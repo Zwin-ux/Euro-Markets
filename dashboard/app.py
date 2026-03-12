@@ -38,87 +38,114 @@ def apply_styles() -> None:
         html, body, [class*="css"] { font-family: "IBM Plex Mono", monospace; color: #eaf4e5; }
         .stApp {
             background:
-                radial-gradient(circle at top left, rgba(158,243,184,.10), transparent 24%),
-                radial-gradient(circle at top right, rgba(245,197,107,.08), transparent 22%),
-                linear-gradient(180deg, #040c08, #07120b),
-                repeating-linear-gradient(0deg, rgba(158,243,184,.025) 0, rgba(158,243,184,.025) 1px, transparent 1px, transparent 28px),
-                repeating-linear-gradient(90deg, rgba(158,243,184,.025) 0, rgba(158,243,184,.025) 1px, transparent 1px, transparent 38px);
+                radial-gradient(circle at top left, rgba(158,243,184,.08), transparent 24%),
+                linear-gradient(180deg, #050b08, #08110d);
         }
+        .block-container { padding-top: 1rem; padding-bottom: 2.25rem; }
         [data-testid="stSidebar"] {
-            background: linear-gradient(180deg, rgba(7,17,11,.98), rgba(7,15,10,.98));
+            background: linear-gradient(180deg, rgba(7,17,11,.98), rgba(8,15,11,.98));
             border-right: 1px solid rgba(158,243,184,.18);
         }
-        [data-testid="stMetric"], .shell, .section, .note {
-            border-radius: 18px;
+        .page-header, [data-testid="stMetric"], .table-shell {
+            border-radius: 16px;
             border: 1px solid rgba(158,243,184,.22);
-            background: rgba(10,20,14,.80);
-            box-shadow: inset 0 0 0 1px rgba(158,243,184,.04), 0 18px 40px rgba(0,0,0,.20);
+            background: rgba(10,20,14,.82);
         }
-        [data-testid="stMetric"] { padding: .9rem 1rem; }
-        [data-testid="stMetricLabel"] {
-            color: #9fb8a4;
+        .page-header {
+            padding: 1.2rem 1.3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, rgba(8,18,12,.98), rgba(10,23,16,.94));
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+        .status-line {
+            display: flex;
+            gap: .45rem;
+            flex-wrap: wrap;
+            margin-bottom: .8rem;
+        }
+        .status-chip {
+            padding: .24rem .58rem;
+            border-radius: 999px;
+            border: 1px solid rgba(158,243,184,.22);
+            color: #9ef3b8;
+            background: rgba(8,18,12,.72);
+            font-size: .72rem;
+            letter-spacing: .14em;
             text-transform: uppercase;
-            letter-spacing: .16em;
-            font-size: .68rem;
+        }
+        .header-copy h1, .section-intro h2, .sidebar-shell h2 {
+            margin: 0;
+            font-family: "Rajdhani", sans-serif;
+            color: #ecf6ea;
+            letter-spacing: .04em;
+        }
+        .header-copy h1 { font-size: 2.35rem; line-height: .95; }
+        .header-copy p, .section-intro p, .sidebar-shell p, .sidebar-note {
+            color: #a8b5ac;
+            line-height: 1.55;
+        }
+        .header-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .7rem;
+            min-width: min(360px, 100%);
+        }
+        .header-stat {
+            padding: .75rem .85rem;
+            border-radius: 14px;
+            border: 1px solid rgba(158,243,184,.18);
+            background: rgba(8,18,12,.64);
+        }
+        .header-stat span {
+            display: block;
+            color: #9fb8a4;
+            font-size: .72rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+        .header-stat strong {
+            display: block;
+            margin-top: .3rem;
+            color: #ecf6ea;
+            font-family: "Rajdhani", sans-serif;
+            font-size: 1.35rem;
+        }
+        .section-intro { margin: .1rem 0 .8rem 0; }
+        .section-intro h2 { font-size: 1.55rem; }
+        .section-intro p { margin: .32rem 0 0 0; max-width: 52rem; }
+        [data-testid="stMetric"] { padding: .85rem .95rem; }
+        [data-testid="stMetricLabel"] {
+            color: #90a493;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            font-size: .70rem;
         }
         [data-testid="stMetricValue"] {
-            color: #eaf4e5;
+            color: #ecf6ea;
             font-family: "Rajdhani", sans-serif;
             font-weight: 700;
         }
-        .shell {
-            padding: 1.4rem 1.5rem;
-            margin-bottom: 1rem;
-            background:
-                radial-gradient(circle at top right, rgba(245,197,107,.14), transparent 24%),
-                linear-gradient(135deg, rgba(8,18,12,.98), rgba(11,27,17,.92));
-        }
-        .pills { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: .9rem; }
-        .pill {
-            border: 1px solid rgba(158,243,184,.22);
-            border-radius: 999px;
-            padding: .24rem .65rem;
-            color: #9ef3b8;
-            background: rgba(10,20,14,.8);
-            text-transform: uppercase;
-            letter-spacing: .16em;
-            font-size: .74rem;
-        }
-        .pill.amber { color: #f5c56b; border-color: rgba(245,197,107,.28); }
-        .hero-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 1rem; }
-        .hero-copy h1, .section h2, .sidebar-shell h2 {
-            margin: 0;
-            font-family: "Rajdhani", sans-serif;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            color: #eaf4e5;
-        }
-        .hero-copy h1 { font-size: 2.65rem; line-height: .95; }
-        .hero-copy p, .section p, .sidebar-shell p { color: #9fb8a4; line-height: 1.55; }
-        .signal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
-        .signal {
-            border-radius: 14px;
+        .sidebar-shell, .sidebar-note {
+            padding: .95rem 1rem;
+            margin: 0 0 .9rem 0;
+            border-radius: 16px;
             border: 1px solid rgba(158,243,184,.18);
-            background: rgba(11,23,16,.86);
-            padding: .8rem .9rem;
+            background: rgba(9,18,12,.78);
         }
-        .signal span, .eyebrow {
+        .eyebrow {
             color: #9ef3b8;
-            font-size: .74rem;
-            letter-spacing: .18em;
+            font-size: .72rem;
+            letter-spacing: .16em;
             text-transform: uppercase;
         }
-        .signal strong {
-            display: block;
-            margin-top: .35rem;
-            color: #eaf4e5;
-            font-family: "Rajdhani", sans-serif;
-            font-size: 1.4rem;
-        }
-        .section, .note, .sidebar-shell { padding: .95rem 1rem; margin: .4rem 0 .9rem; }
-        .section h2 { font-size: 1.55rem; }
-        .sidebar-shell { margin-bottom: 1rem; }
-        .note { color: #f5c56b; border-color: rgba(245,197,107,.22); background: rgba(44,29,10,.32); }
+        .sidebar-shell h2 { font-size: 1.5rem; }
+        .sidebar-shell p, .sidebar-note { margin: .35rem 0 0 0; }
         .upload-card {
             margin-top: .8rem;
             padding: .8rem .9rem;
@@ -130,18 +157,18 @@ def apply_styles() -> None:
         .upload-card strong { display: block; margin-top: .3rem; font-family: "Rajdhani", sans-serif; font-size: 1.1rem; color: #eaf4e5; }
         .stTabs [data-baseweb="tab"] {
             border-radius: 14px; border: 1px solid rgba(158,243,184,.18); background: rgba(9,18,12,.8);
-            color: #9fb8a4; font-family: "Rajdhani", sans-serif; letter-spacing: .14em; text-transform: uppercase;
+            color: #9fb8a4; font-family: "Rajdhani", sans-serif; letter-spacing: .10em; text-transform: uppercase;
         }
-        .stTabs [aria-selected="true"] { background: linear-gradient(135deg, rgba(158,243,184,.16), rgba(245,197,107,.14)); color: #eaf4e5; }
+        .stTabs [aria-selected="true"] { background: rgba(158,243,184,.14); color: #eaf4e5; }
         .stButton > button, .stDownloadButton > button {
-            border-radius: 14px; border: 1px solid rgba(158,243,184,.28); background: linear-gradient(135deg, rgba(18,41,28,.96), rgba(13,28,19,.96));
-            color: #eaf4e5; font-family: "Rajdhani", sans-serif; letter-spacing: .12em; text-transform: uppercase;
+            border-radius: 14px; border: 1px solid rgba(158,243,184,.28); background: rgba(13,28,19,.96);
+            color: #eaf4e5; font-family: "Rajdhani", sans-serif; letter-spacing: .08em; text-transform: uppercase;
         }
         div[data-baseweb="select"] > div, div[data-baseweb="input"] > div,
         [data-testid="stFileUploaderDropzone"], [data-testid="stDataFrame"], [data-testid="stDataEditor"], .stCodeBlock, pre {
             border-radius: 16px !important; border-color: rgba(158,243,184,.18) !important; background: rgba(10,20,14,.76) !important;
         }
-        @media (max-width: 900px) { .hero-grid, .signal-grid { grid-template-columns: 1fr; } .hero-copy h1 { font-size: 2.1rem; } }
+        @media (max-width: 900px) { .header-stats { grid-template-columns: 1fr; } .header-copy h1 { font-size: 2rem; } }
         </style>
         """,
         unsafe_allow_html=True,
@@ -157,11 +184,10 @@ def format_eur(value: float, decimals: int = 0, signed: bool = False) -> str:
     return f"{prefix}{value:,.{decimals}f} EUR"
 
 
-def section(title: str, kicker: str, description: str) -> None:
+def section(title: str, description: str) -> None:
     st.markdown(
         f"""
-        <div class="section">
-            <div class="eyebrow">{kicker}</div>
+        <div class="section-intro">
             <h2>{title}</h2>
             <p>{description}</p>
         </div>
@@ -296,31 +322,143 @@ def load_portfolio_input(uploaded_file) -> tuple[pd.DataFrame, str]:
     return pd.read_csv(uploaded_file), "Custom portfolio uploaded and staged for analysis."
 
 
-def render_hero(market_result: dict, focus_currency: str, portfolio_frame: pd.DataFrame) -> None:
+def latest_snapshot_date(snapshot: pd.DataFrame) -> str:
+    if snapshot.empty:
+        return "Unavailable"
+    return str(snapshot["rate_date"].max())
+
+
+def top_exposure_summary(exposure: pd.DataFrame) -> tuple[str, float]:
+    non_reporting = exposure.loc[exposure["currency"] != REPORTING_CURRENCY].copy()
+    if non_reporting.empty:
+        return "EUR only", 0.0
+    top_row = non_reporting.sort_values("value_eur", ascending=False).iloc[0]
+    return str(top_row["currency"]), float(top_row["value_eur"])
+
+
+def worst_scenario_summary(scenario_analysis: pd.DataFrame) -> tuple[str, float]:
+    if scenario_analysis.empty:
+        return "None", 0.0
+    worst_row = scenario_analysis.sort_values("scenario_pnl_eur").iloc[0]
+    return str(worst_row["currency"]), float(worst_row["scenario_pnl_eur"])
+
+
+def format_snapshot_table(snapshot: pd.DataFrame) -> pd.DataFrame:
+    if snapshot.empty:
+        return snapshot
+    display = snapshot.loc[:, ["target_currency", "exchange_rate", "rate_date"]].copy()
+    display = display.rename(columns={"target_currency": "Currency", "exchange_rate": "Rate", "rate_date": "Date"})
+    display["Rate"] = display["Rate"].map(lambda value: f"{value:.4f}")
+    return display.sort_values("Currency").reset_index(drop=True)
+
+
+def format_exposure_table(exposure: pd.DataFrame) -> pd.DataFrame:
+    if exposure.empty:
+        return exposure
+    display = exposure.loc[:, ["currency", "position_count", "value_eur", "portfolio_weight", "fx_pnl_1d_eur"]].copy()
+    display = display.rename(
+        columns={
+            "currency": "Currency",
+            "position_count": "Positions",
+            "value_eur": "Value (EUR)",
+            "portfolio_weight": "Weight",
+            "fx_pnl_1d_eur": "1D FX P&L (EUR)",
+        }
+    )
+    display["Value (EUR)"] = display["Value (EUR)"].map(lambda value: f"{value:,.0f}")
+    display["Weight"] = display["Weight"].map(lambda value: f"{value * 100:.1f}%")
+    display["1D FX P&L (EUR)"] = display["1D FX P&L (EUR)"].map(lambda value: f"{value:,.0f}")
+    return display.reset_index(drop=True)
+
+
+def format_scenario_table(scenario_analysis: pd.DataFrame) -> pd.DataFrame:
+    if scenario_analysis.empty:
+        return scenario_analysis
+    display = scenario_analysis.loc[:, ["currency", "shock_pct", "current_value_eur", "scenario_pnl_eur"]].copy()
+    display = display.rename(
+        columns={
+            "currency": "Currency",
+            "shock_pct": "Shock",
+            "current_value_eur": "Base Value (EUR)",
+            "scenario_pnl_eur": "Scenario P&L (EUR)",
+        }
+    )
+    display["Shock"] = display["Shock"].map(lambda value: f"{value * 100:.2f}%")
+    display["Base Value (EUR)"] = display["Base Value (EUR)"].map(lambda value: f"{value:,.0f}")
+    display["Scenario P&L (EUR)"] = display["Scenario P&L (EUR)"].map(lambda value: f"{value:,.0f}")
+    return display.reset_index(drop=True)
+
+
+def format_positions_table(positions: pd.DataFrame) -> pd.DataFrame:
+    if positions.empty:
+        return positions
+    display = positions.loc[
+        :,
+        ["position_id", "position_name", "book", "asset_class", "currency", "value_eur", "fx_pnl_1d_eur"],
+    ].copy()
+    display = display.rename(
+        columns={
+            "position_id": "Position ID",
+            "position_name": "Position Name",
+            "book": "Book",
+            "asset_class": "Asset Class",
+            "currency": "Currency",
+            "value_eur": "Value (EUR)",
+            "fx_pnl_1d_eur": "1D FX P&L (EUR)",
+        }
+    )
+    display["Value (EUR)"] = display["Value (EUR)"].map(lambda value: f"{value:,.0f}")
+    display["1D FX P&L (EUR)"] = display["1D FX P&L (EUR)"].map(lambda value: f"{value:,.0f}")
+    return display.reset_index(drop=True)
+
+
+def filter_positions(positions: pd.DataFrame, key_prefix: str) -> pd.DataFrame:
+    filtered = positions.copy()
+    books = sorted(book for book in filtered["book"].unique() if book)
+    asset_classes = sorted(asset_class for asset_class in filtered["asset_class"].unique() if asset_class)
+
+    filter_columns = st.columns(2)
+    selected_books = filter_columns[0].multiselect("Book", options=books, default=books, key=f"{key_prefix}_books")
+    selected_asset_classes = filter_columns[1].multiselect(
+        "Asset class",
+        options=asset_classes,
+        default=asset_classes,
+        key=f"{key_prefix}_asset_classes",
+    )
+
+    if books:
+        filtered = filtered[filtered["book"].isin(selected_books)] if selected_books else filtered.iloc[0:0]
+    if asset_classes:
+        filtered = filtered[filtered["asset_class"].isin(selected_asset_classes)] if selected_asset_classes else filtered.iloc[0:0]
+
+    return filtered.reset_index(drop=True)
+
+
+def render_header(market_result: dict, portfolio_analysis: dict, focus_currency: str, portfolio_rows: int) -> None:
     snapshot = market_result["latest_snapshot"]
-    last_rate_date = snapshot["rate_date"].max() if not snapshot.empty else "Unavailable"
-    coverage_count = int(snapshot["target_currency"].nunique()) if not snapshot.empty else 0
+    top_currency, top_value = top_exposure_summary(portfolio_analysis["currency_exposure"])
+    snapshot_count = int(snapshot["target_currency"].nunique()) if not snapshot.empty else 0
     st.markdown(
         f"""
-        <div class="shell">
-            <div class="pills">
-                <span class="pill">ECB feed online</span>
-                <span class="pill">railway deployed</span>
-                <span class="pill amber">reporting currency {REPORTING_CURRENCY}</span>
+        <div class="page-header">
+            <div class="status-line">
+                <span class="status-chip">ECB reference rates</span>
+                <span class="status-chip">Focus EUR/{focus_currency}</span>
+                <span class="status-chip">Rates as of {latest_snapshot_date(snapshot)}</span>
             </div>
-            <div class="hero-grid">
-                <div class="hero-copy">
-                    <h1>Capital Risk Intelligence</h1>
+            <div class="header-row">
+                <div class="header-copy">
+                    <h1>EUR FX Risk Dashboard</h1>
                     <p>
-                        Tactical FX surveillance for EUR portfolios. Inspect live rate posture, exposure,
-                        VaR, and stress scenarios from one terminal-style operating screen.
+                        Track ECB reference rates, portfolio exposure, and stress outcomes without digging
+                        through separate screens or infrastructure details.
                     </p>
                 </div>
-                <div class="signal-grid">
-                    <div class="signal"><span>Focus pair</span><strong>EUR/{focus_currency}</strong></div>
-                    <div class="signal"><span>Snapshot coverage</span><strong>{coverage_count} FX legs</strong></div>
-                    <div class="signal"><span>Portfolio rows</span><strong>{len(portfolio_frame):,}</strong></div>
-                    <div class="signal"><span>Latest rate date</span><strong>{last_rate_date}</strong></div>
+                <div class="header-stats">
+                    <div class="header-stat"><span>Portfolio rows</span><strong>{portfolio_rows:,}</strong></div>
+                    <div class="header-stat"><span>Snapshot currencies</span><strong>{snapshot_count}</strong></div>
+                    <div class="header-stat"><span>Largest FX exposure</span><strong>{top_currency}</strong></div>
+                    <div class="header-stat"><span>Exposure size</span><strong>{format_eur(top_value)}</strong></div>
                 </div>
             </div>
         </div>
@@ -329,98 +467,193 @@ def render_hero(market_result: dict, focus_currency: str, portfolio_frame: pd.Da
     )
 
 
-def render_market_tab(market_result: dict) -> None:
+def render_overview_tab(market_result: dict, portfolio_analysis: dict, focus_currency: str) -> None:
     section(
-        "Market Radar",
-        "live rate surveillance",
-        "Monitor the active EUR cross, rate path, and realized volatility from the ECB-backed feed.",
+        "Overview",
+        "Start here. This screen answers what changed, where the risk sits, and which EUR cross deserves attention first.",
     )
-    summary = market_result["summary"]
-    history = market_result["history"]
-    latest_snapshot = market_result["latest_snapshot"]
-    rolling_volatility = market_result["rolling_volatility"]
 
-    metrics = st.columns(4)
-    metrics[0].metric("Latest Rate", f"{summary['latest_rate']:.4f}")
-    metrics[1].metric("Period Return", format_percent(summary["period_return"]))
-    metrics[2].metric("Annualized Volatility", format_percent(summary["annualized_volatility"]))
-    metrics[3].metric("Max Drawdown", format_percent(summary["max_drawdown"]))
+    portfolio_summary = portfolio_analysis["summary"]
+    market_summary = market_result["summary"]
+    exposure = portfolio_analysis["currency_exposure"]
+    non_reporting_exposure = exposure.loc[exposure["currency"] != REPORTING_CURRENCY].copy()
+    top_currency, top_value = top_exposure_summary(exposure)
 
-    charts = st.columns((1.25, 1))
-    with charts[0]:
+    metrics = st.columns(5)
+    metrics[0].metric("Portfolio Value", format_eur(portfolio_summary["portfolio_value_eur"]))
+    metrics[1].metric("1D FX P&L", format_eur(portfolio_summary["fx_pnl_1d_eur"], signed=True))
+    metrics[2].metric(
+        f"{int(portfolio_summary['confidence_level'] * 100)}% 1D VaR",
+        format_eur(portfolio_summary["historical_var_1d_eur"]),
+    )
+    metrics[3].metric("Largest FX Exposure", top_currency, delta=format_eur(top_value))
+    metrics[4].metric(
+        f"EUR/{focus_currency}",
+        f"{market_summary['latest_rate']:.4f}",
+        delta=format_percent(market_summary["period_return"]),
+    )
+
+    st.altair_chart(
+        line_chart(
+            portfolio_analysis["portfolio_value_history"],
+            "rate_date:T",
+            "portfolio_value_eur:Q",
+            GREEN,
+            "Portfolio value path",
+        ),
+        use_container_width=True,
+    )
+
+    lower_columns = st.columns((1, 1))
+    with lower_columns[0]:
+        if non_reporting_exposure.empty:
+            st.info("No non-EUR exposure is present in the current portfolio.")
+        else:
+            st.altair_chart(
+                bar_chart(
+                    non_reporting_exposure.head(8),
+                    "currency:N",
+                    "value_eur:Q",
+                    GREEN_DIM,
+                    "Largest non-EUR exposures",
+                ),
+                use_container_width=True,
+            )
+    with lower_columns[1]:
         st.altair_chart(
-            line_chart(history, "rate_date:T", "exchange_rate:Q", GREEN, "EUR cross history"),
+            line_chart(
+                market_result["history"],
+                "rate_date:T",
+                "exchange_rate:Q",
+                AMBER,
+                f"EUR/{focus_currency} rate history",
+            ),
             use_container_width=True,
         )
-    with charts[1]:
-        st.altair_chart(
-            line_chart(rolling_volatility, "rate_date:T", "rolling_volatility:Q", AMBER, "Rolling volatility"),
-            use_container_width=True,
-        )
-
-    section(
-        "Snapshot Board",
-        "current market posture",
-        "Latest multi-currency ECB reference snapshot used by both the dashboard and the portfolio engine.",
-    )
-    st.dataframe(latest_snapshot, use_container_width=True, hide_index=True)
 
 
-def render_portfolio_tab(
-    portfolio_frame: pd.DataFrame,
-    portfolio_message: str,
+def render_portfolio_risk_tab(
+    cleaned_portfolio: pd.DataFrame,
     lookback_days: int,
     confidence_level: float,
     rolling_window: int,
     frequency: str,
 ) -> None:
     section(
-        "Portfolio Command",
-        "risk operating picture",
-        "Filter the book, inject bespoke currency shocks, and inspect exposure, VaR, and correlation from one panel.",
-    )
-    st.markdown(f"<div class='note'><strong>Portfolio source:</strong> {portfolio_message}</div>", unsafe_allow_html=True)
-
-    cleaned_positions = clean_portfolio_positions(portfolio_frame)
-    filters = st.columns(2)
-    selected_books = filters[0].multiselect(
-        "Books",
-        options=sorted(book for book in cleaned_positions["book"].unique() if book),
-        default=sorted(book for book in cleaned_positions["book"].unique() if book),
-    )
-    selected_asset_classes = filters[1].multiselect(
-        "Asset classes",
-        options=sorted(asset_class for asset_class in cleaned_positions["asset_class"].unique() if asset_class),
-        default=sorted(asset_class for asset_class in cleaned_positions["asset_class"].unique() if asset_class),
+        "Portfolio Risk",
+        "Drill into a book or asset class. The table stays ranked by EUR value so concentration stays obvious.",
     )
 
-    filtered_positions = cleaned_positions.copy()
-    if selected_books:
-        filtered_positions = filtered_positions[filtered_positions["book"].isin(selected_books)]
-    if selected_asset_classes:
-        filtered_positions = filtered_positions[filtered_positions["asset_class"].isin(selected_asset_classes)]
+    with st.expander("Filters", expanded=True):
+        filtered_positions = filter_positions(cleaned_portfolio, "risk")
+
+    if filtered_positions.empty:
+        st.warning("No positions remain after the selected filters.")
+        return
+
+    analysis = get_portfolio_analysis_result(
+        portfolio_csv=filtered_positions.to_csv(index=False),
+        lookback_days=lookback_days,
+        confidence_level=confidence_level,
+        rolling_window=rolling_window,
+        frequency=frequency,
+        scenario_shocks=tuple(),
+    )
+
+    summary = analysis["summary"]
+    exposure = analysis["currency_exposure"]
+    non_reporting_exposure = exposure.loc[exposure["currency"] != REPORTING_CURRENCY].copy()
+
+    metrics = st.columns(5)
+    metrics[0].metric("Portfolio Value", format_eur(summary["portfolio_value_eur"]))
+    metrics[1].metric("Non-EUR Share", format_percent(summary["non_eur_share"], decimals=1))
+    metrics[2].metric("Annualized Volatility", format_percent(summary["annualized_portfolio_volatility"]))
+    metrics[3].metric("Positions", f"{summary['position_count']}")
+    metrics[4].metric("Currencies", f"{summary['currency_count']}")
+
+    st.dataframe(format_exposure_table(exposure), use_container_width=True, hide_index=True)
+
+    visuals = st.columns((1.05, 0.95))
+    with visuals[0]:
+        if non_reporting_exposure.empty:
+            st.info("No non-EUR exposure is present in the selected slice.")
+        else:
+            st.altair_chart(
+                bar_chart(
+                    non_reporting_exposure.head(8),
+                    "currency:N",
+                    "value_eur:Q",
+                    GREEN_DIM,
+                    "Exposure by currency",
+                ),
+                use_container_width=True,
+            )
+    with visuals[1]:
+        if analysis["correlation_matrix"].empty:
+            st.info("Correlation requires at least two non-EUR currencies with overlapping history.")
+        else:
+            st.altair_chart(heatmap_chart(analysis["correlation_matrix"]), use_container_width=True)
+
+    st.altair_chart(
+        line_chart(
+            analysis["portfolio_value_history"],
+            "rate_date:T",
+            "portfolio_value_eur:Q",
+            GREEN,
+            "Filtered portfolio value path",
+        ),
+        use_container_width=True,
+    )
+
+    with st.expander("Position detail"):
+        st.dataframe(format_positions_table(analysis["positions"]), use_container_width=True, hide_index=True)
+
+
+def render_stress_test_tab(
+    cleaned_portfolio: pd.DataFrame,
+    lookback_days: int,
+    confidence_level: float,
+    rolling_window: int,
+    frequency: str,
+) -> None:
+    section(
+        "Stress Test",
+        "Set directional shocks and inspect the resulting P&L by currency for the selected portfolio slice.",
+    )
+
+    with st.expander("Scope", expanded=True):
+        filtered_positions = filter_positions(cleaned_portfolio, "stress")
+
     if filtered_positions.empty:
         st.warning("No positions remain after the selected filters.")
         return
 
     scenario_base = pd.DataFrame(
         {
-            "currency": [currency for currency in sorted(filtered_positions["currency"].unique()) if currency != REPORTING_CURRENCY],
+            "currency": [
+                currency
+                for currency in sorted(filtered_positions["currency"].unique())
+                if currency != REPORTING_CURRENCY
+            ],
             "shock_pct": 0.0,
         }
     )
-    section(
-        "Scenario Overrides",
-        "manual stress inputs",
-        "Set shock percentages by currency. Positive values imply EUR strengthens against the target leg.",
-    )
-    scenario_editor = st.data_editor(
-        scenario_base,
-        use_container_width=True,
-        hide_index=True,
-        num_rows="fixed",
-        column_config={"shock_pct": st.column_config.NumberColumn("Shock (%)", format="%.2f")},
-    )
+
+    if scenario_base.empty:
+        st.info("The selected scope contains only EUR positions, so there is no FX stress to run.")
+        return
+
+    editor_column, output_column = st.columns((0.8, 1.2))
+    with editor_column:
+        st.caption("Positive shock means EUR strengthens against the selected currency.")
+        scenario_editor = st.data_editor(
+            scenario_base,
+            use_container_width=True,
+            hide_index=True,
+            num_rows="fixed",
+            column_config={"shock_pct": st.column_config.NumberColumn("Shock (%)", format="%.2f")},
+        )
+
     scenario_shocks = tuple(
         (row["currency"], float(row["shock_pct"]) / 100.0)
         for _, row in scenario_editor.iterrows()
@@ -436,111 +669,103 @@ def render_portfolio_tab(
         scenario_shocks=scenario_shocks,
     )
 
-    summary = analysis["summary"]
-    exposure = analysis["currency_exposure"]
-    value_history = analysis["portfolio_value_history"]
-    rolling_volatility = analysis["rolling_volatility"]
     scenario_analysis = analysis["scenario_analysis"]
-    correlation_matrix = analysis["correlation_matrix"]
-    positions = analysis["positions"]
+    worst_currency, worst_pnl = worst_scenario_summary(scenario_analysis)
 
-    metrics = st.columns(6)
-    metrics[0].metric("Portfolio Value", format_eur(summary["portfolio_value_eur"]))
-    metrics[1].metric("1D FX P&L", format_eur(summary["fx_pnl_1d_eur"], signed=True))
-    metrics[2].metric(f"{int(confidence_level * 100)}% 1D VaR", format_eur(summary["historical_var_1d_eur"]))
-    metrics[3].metric("Annualized Volatility", format_percent(summary["annualized_portfolio_volatility"]))
-    metrics[4].metric("Non-EUR Share", format_percent(summary["non_eur_share"], decimals=1))
-    metrics[5].metric("Scenario Total", format_eur(summary["scenario_total_pnl_eur"], signed=True))
+    with output_column:
+        metrics = st.columns(3)
+        metrics[0].metric("Scenario Total", format_eur(analysis["summary"]["scenario_total_pnl_eur"], signed=True))
+        metrics[1].metric("Worst Currency", worst_currency, delta=format_eur(worst_pnl, signed=True))
+        metrics[2].metric("Shocks Applied", str(len(scenario_shocks)))
 
-    charts = st.columns(2)
-    with charts[0]:
-        st.altair_chart(
-            bar_chart(exposure, "currency:N", "value_eur:Q", GREEN_DIM, "EUR exposure by currency"),
-            use_container_width=True,
-        )
-    with charts[1]:
-        st.altair_chart(
-            bar_chart(scenario_analysis, "currency:N", "scenario_pnl_eur:Q", RED, "Scenario P&L response", directional=True),
-            use_container_width=True,
-        )
+        if not scenario_shocks:
+            st.info("All shocks are set to 0.00%. Update one or more rows to run a non-flat scenario.")
 
-    history = st.columns(2)
-    with history[0]:
         st.altair_chart(
-            line_chart(value_history, "rate_date:T", "portfolio_value_eur:Q", GREEN, "Portfolio value path"),
-            use_container_width=True,
-        )
-    with history[1]:
-        st.altair_chart(
-            line_chart(rolling_volatility, "rate_date:T", "rolling_volatility:Q", AMBER, "Rolling portfolio volatility"),
+            bar_chart(
+                scenario_analysis,
+                "currency:N",
+                "scenario_pnl_eur:Q",
+                RED,
+                "Scenario P&L by currency",
+                directional=True,
+            ),
             use_container_width=True,
         )
 
+    st.dataframe(format_scenario_table(scenario_analysis), use_container_width=True, hide_index=True)
+
+
+def render_data_tab(
+    market_result: dict,
+    currency_catalog: pd.DataFrame,
+    lookback_days: int,
+    frequency: str,
+) -> None:
     section(
-        "Correlation Grid",
-        "dependency scan",
-        "Pairwise return correlation across non-EUR exposures in the selected portfolio slice.",
+        "Data & API",
+        "Reference data, source freshness, and the integration contract behind the dashboard.",
     )
-    st.altair_chart(heatmap_chart(correlation_matrix), use_container_width=True)
 
-    detail_tabs = st.tabs(["Exposure Ledger", "Scenario Ledger", "Position Book"])
-    with detail_tabs[0]:
-        st.dataframe(exposure, use_container_width=True, hide_index=True)
-    with detail_tabs[1]:
-        st.dataframe(scenario_analysis, use_container_width=True, hide_index=True)
-    with detail_tabs[2]:
-        st.dataframe(positions, use_container_width=True, hide_index=True)
+    snapshot = market_result["latest_snapshot"]
+    metrics = st.columns(4)
+    metrics[0].metric("Rates As Of", latest_snapshot_date(snapshot))
+    metrics[1].metric("Snapshot Currencies", f"{snapshot['target_currency'].nunique() if not snapshot.empty else 0}")
+    metrics[2].metric("Supported Currencies", f"{len(currency_catalog)}")
+    metrics[3].metric("Lookback Window", f"{lookback_days} days")
 
+    columns = st.columns((1.1, 0.9))
+    with columns[0]:
+        st.dataframe(format_snapshot_table(snapshot), use_container_width=True, hide_index=True)
+    with columns[1]:
+        st.markdown(
+            f"""
+            <div class="table-shell">
+                <p><strong>Source</strong>: ECB reference rates via Euro Rates API.</p>
+                <p><strong>Reporting currency</strong>: {REPORTING_CURRENCY}</p>
+                <p><strong>History frequency</strong>: {frequency}</p>
+                <p><strong>Purpose</strong>: EUR rate monitoring, exposure analysis, and scenario testing.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-def render_platform_tab() -> None:
-    section(
-        "System Surface",
-        "deployment and API contract",
-        "Operator notes for running the local stack, testing the API, and validating the CSV interface.",
-    )
-    st.code(
-        """\
+    with st.expander("API routes"):
+        st.dataframe(
+            pd.DataFrame(
+                [
+                    {"method": "GET", "path": "/health", "purpose": "Service health and source metadata"},
+                    {"method": "GET", "path": "/currencies", "purpose": "Supported ECB currency catalog"},
+                    {"method": "GET", "path": "/rates/latest", "purpose": "Current EUR exchange rates"},
+                    {"method": "GET", "path": "/rates/history", "purpose": "Historical EUR FX series"},
+                    {"method": "GET", "path": "/market-monitor", "purpose": "Market dashboard payload"},
+                    {"method": "POST", "path": "/portfolio/analyze", "purpose": "Portfolio FX risk analysis"},
+                ]
+            ),
+            use_container_width=True,
+            hide_index=True,
+        )
+
+    with st.expander("Portfolio CSV contract"):
+        st.code(
+            """\
+position_id,position_name,asset_class,book,currency,market_value_local
+EQ-USD-01,US Equity Sleeve,Equity,Global Macro,USD,250000
+BOND-GBP-01,UK Gilts,Bonds,Macro Rates,GBP,180000
+""",
+            language="csv",
+        )
+
+    with st.expander("Run locally"):
+        st.code(
+            """\
 python -m venv .venv
 .\\.venv\\Scripts\\python -m pip install -r requirements.txt
 .\\.venv\\Scripts\\python -m streamlit run dashboard\\app.py
 .\\.venv\\Scripts\\python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
 """,
-        language="powershell",
-    )
-
-    section(
-        "API Surface",
-        "backend routes",
-        "Primary endpoints exposed by the FastAPI layer that powers the dashboard and external integrations.",
-    )
-    st.dataframe(
-        pd.DataFrame(
-            [
-                {"method": "GET", "path": "/health", "purpose": "Service health and source metadata"},
-                {"method": "GET", "path": "/currencies", "purpose": "Supported ECB currency catalog"},
-                {"method": "GET", "path": "/rates/latest", "purpose": "Current EUR exchange rates"},
-                {"method": "GET", "path": "/rates/history", "purpose": "Historical EUR FX series"},
-                {"method": "GET", "path": "/market-monitor", "purpose": "Market dashboard payload"},
-                {"method": "POST", "path": "/portfolio/analyze", "purpose": "Portfolio FX risk analysis"},
-            ]
-        ),
-        use_container_width=True,
-        hide_index=True,
-    )
-
-    section(
-        "Portfolio CSV Contract",
-        "input schema",
-        "Minimum fields required to upload a book into the portfolio risk engine.",
-    )
-    st.code(
-        """\
-position_id,position_name,asset_class,book,currency,market_value_local
-EQ-USD-01,US Equity Sleeve,Equity,Global Macro,USD,250000
-BOND-GBP-01,UK Gilts,Bonds,Macro Rates,GBP,180000
-""",
-        language="csv",
-    )
+            language="powershell",
+        )
 
 
 def main() -> None:
@@ -557,9 +782,9 @@ def main() -> None:
         st.markdown(
             """
             <div class="sidebar-shell">
-                <div class="eyebrow">control stack</div>
-                <h2>Mission Parameters</h2>
-                <p>Tune the surveillance horizon, choose the focus pair, and upload a portfolio file before the system assembles the risk picture.</p>
+                <div class="eyebrow">Controls</div>
+                <h2>Core Inputs</h2>
+                <p>Pick the focus pair and load a portfolio. Daily settings below are already tuned for a typical review.</p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -569,15 +794,6 @@ def main() -> None:
             options=currency_options,
             index=currency_options.index("USD") if "USD" in currency_options else 0,
         )
-        market_currencies = st.multiselect(
-            "Market snapshot currencies",
-            options=currency_options,
-            default=default_market_currencies or currency_options[:6],
-        )
-        frequency = st.selectbox("Frequency", options=["D", "M", "Q", "A"], index=0)
-        lookback_days = st.slider("Lookback window", min_value=30, max_value=365, value=180, step=30)
-        confidence_level = st.slider("VaR confidence level", min_value=0.80, max_value=0.99, value=0.95, step=0.01)
-        rolling_window = st.slider("Rolling volatility window", min_value=5, max_value=60, value=20, step=1)
         uploaded_portfolio = st.file_uploader("Upload portfolio CSV", type=["csv"])
         sample_portfolio = get_sample_portfolio_frame()
         st.download_button(
@@ -586,6 +802,24 @@ def main() -> None:
             file_name="sample_portfolio.csv",
             mime="text/csv",
         )
+        st.markdown(
+            """
+            <div class="sidebar-note">
+                Defaults are set for a daily EUR portfolio workflow. Open advanced settings only if you need to change the horizon or model parameters.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        with st.expander("Advanced settings"):
+            market_currencies = st.multiselect(
+                "Market snapshot currencies",
+                options=currency_options,
+                default=default_market_currencies or currency_options[:6],
+            )
+            frequency = st.selectbox("Frequency", options=["D", "M", "Q", "A"], index=0)
+            lookback_days = st.slider("Lookback window", min_value=30, max_value=365, value=180, step=30)
+            confidence_level = st.slider("VaR confidence level", min_value=0.80, max_value=0.99, value=0.95, step=0.01)
+            rolling_window = st.slider("Rolling volatility window", min_value=5, max_value=60, value=20, step=1)
         st.markdown(
             """
             <div class="upload-card">
@@ -603,27 +837,57 @@ def main() -> None:
             lookback_days=lookback_days,
             frequency=frequency,
         )
-        portfolio_frame, portfolio_message = load_portfolio_input(uploaded_portfolio)
+        portfolio_frame, _portfolio_message = load_portfolio_input(uploaded_portfolio)
+        cleaned_portfolio = clean_portfolio_positions(portfolio_frame)
+        overview_analysis = get_portfolio_analysis_result(
+            portfolio_csv=cleaned_portfolio.to_csv(index=False),
+            lookback_days=lookback_days,
+            confidence_level=confidence_level,
+            rolling_window=rolling_window,
+            frequency=frequency,
+            scenario_shocks=tuple(),
+        )
     except Exception as exc:
-        st.error(f"Unable to load ECB market data: {exc}")
+        st.error(f"Unable to load dashboard data: {exc}")
         st.stop()
 
-    render_hero(market_result, focus_currency=focus_currency, portfolio_frame=portfolio_frame)
+    render_header(
+        market_result=market_result,
+        portfolio_analysis=overview_analysis,
+        focus_currency=focus_currency,
+        portfolio_rows=len(cleaned_portfolio),
+    )
 
-    market_tab, portfolio_tab, platform_tab = st.tabs(["Market Radar", "Portfolio Command", "System Surface"])
-    with market_tab:
-        render_market_tab(market_result)
-    with portfolio_tab:
-        render_portfolio_tab(
-            portfolio_frame=portfolio_frame,
-            portfolio_message=portfolio_message,
+    overview_tab, risk_tab, stress_tab, data_tab = st.tabs(["Overview", "Portfolio Risk", "Stress Test", "Data & API"])
+    with overview_tab:
+        render_overview_tab(
+            market_result=market_result,
+            portfolio_analysis=overview_analysis,
+            focus_currency=focus_currency,
+        )
+    with risk_tab:
+        render_portfolio_risk_tab(
+            cleaned_portfolio=cleaned_portfolio,
             lookback_days=lookback_days,
             confidence_level=confidence_level,
             rolling_window=rolling_window,
             frequency=frequency,
         )
-    with platform_tab:
-        render_platform_tab()
+    with stress_tab:
+        render_stress_test_tab(
+            cleaned_portfolio=cleaned_portfolio,
+            lookback_days=lookback_days,
+            confidence_level=confidence_level,
+            rolling_window=rolling_window,
+            frequency=frequency,
+        )
+    with data_tab:
+        render_data_tab(
+            market_result=market_result,
+            currency_catalog=currency_catalog,
+            lookback_days=lookback_days,
+            frequency=frequency,
+        )
 
 
 if __name__ == "__main__":
