@@ -3,6 +3,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -40,28 +41,30 @@ export function ValueBarChart({
       <div className="chart-shell" style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
-            <CartesianGrid stroke="rgba(113, 147, 122, 0.18)" vertical={false} />
+            <CartesianGrid stroke="rgba(182, 255, 199, 0.14)" strokeDasharray="4 6" vertical={false} />
             <XAxis
               dataKey={xKey}
-              tick={{ fill: '#8fa593', fontSize: 12 }}
-              axisLine={{ stroke: 'rgba(113, 147, 122, 0.18)' }}
+              tick={{ fill: '#b6ffc7', fontSize: 12 }}
+              axisLine={{ stroke: 'rgba(182, 255, 199, 0.14)' }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: '#8fa593', fontSize: 12 }}
-              axisLine={{ stroke: 'rgba(113, 147, 122, 0.18)' }}
+              tick={{ fill: '#b6ffc7', fontSize: 12 }}
+              axisLine={{ stroke: 'rgba(182, 255, 199, 0.14)' }}
               tickLine={false}
               width={84}
             />
+            {directional ? <ReferenceLine y={0} stroke="rgba(240, 201, 114, 0.4)" strokeDasharray="5 5" /> : null}
             <Tooltip
               contentStyle={{
-                backgroundColor: '#0b1510',
-                border: '1px solid rgba(113, 147, 122, 0.28)',
-                borderRadius: '14px',
+                backgroundColor: '#08110b',
+                border: '1px solid rgba(182, 255, 199, 0.24)',
+                borderRadius: '8px',
+                boxShadow: '0 12px 28px rgba(0, 0, 0, 0.32)',
               }}
               formatter={(value) => formatCurrency(Number(value), { signed: directional })}
             />
-            <Bar dataKey={yKey} radius={[8, 8, 0, 0]}>
+            <Bar dataKey={yKey} radius={[2, 2, 0, 0]} barSize={26}>
               {data.map((row, index) => {
                 const numericValue = Number(row[yKey]);
                 const fill = directional && numericValue < 0 ? negativeColor : positiveColor;

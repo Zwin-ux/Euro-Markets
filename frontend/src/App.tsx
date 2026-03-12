@@ -36,30 +36,34 @@ type TabId = 'overview' | 'risk' | 'stress' | 'data';
 
 const DEFAULT_MARKET_CURRENCIES = ['USD', 'GBP', 'CHF', 'JPY', 'AUD', 'CAD'];
 
-const TAB_CONFIG: Array<{ id: TabId; label: string; eyebrow: string; description: string }> = [
+const TAB_CONFIG: Array<{ id: TabId; label: string; eyebrow: string; description: string; module: string }> = [
   {
     id: 'overview',
     label: 'Overview',
     eyebrow: 'Live picture',
     description: 'Start with the market pulse, the biggest exposure, and the pair that deserves attention first.',
+    module: 'MOD-01',
   },
   {
     id: 'risk',
     label: 'Portfolio Risk',
     eyebrow: 'Concentration',
     description: 'Narrow the book, then inspect exposure, volatility, and the positions driving the current footprint.',
+    module: 'MOD-02',
   },
   {
     id: 'stress',
     label: 'Stress Test',
     eyebrow: 'Scenario work',
     description: 'Run deliberate shocks and compare which currencies swing the portfolio hardest under pressure.',
+    module: 'MOD-03',
   },
   {
     id: 'data',
     label: 'Data & API',
     eyebrow: 'Reference',
     description: 'Check freshness, sample inputs, and the payload contract behind the frontend.',
+    module: 'MOD-04',
   },
 ];
 
@@ -353,6 +357,16 @@ function App() {
     },
   ];
 
+  const terminalLines = [
+    market
+      ? `> uplink.ecb status=online pair=EUR/${effectiveFocusCurrency} rate=${formatRate(market.summary.latest_rate)}`
+      : `> uplink.ecb status=boot pair=EUR/${effectiveFocusCurrency} rate=pending`,
+    portfolioLoaded
+      ? `> portfolio.cache state=loaded rows=${deferredPortfolioRows.length} source=${portfolioSource}`
+      : '> portfolio.cache state=idle source=sample_or_csv pending',
+    `> module.active code=${activeTabConfig.module.toLowerCase()} cadence=${frequency.toLowerCase()} window=${lookbackDays}d`,
+  ];
+
   return (
     <div className="app-shell">
       <aside className="control-rail">
@@ -532,6 +546,11 @@ function App() {
               <p className="hero-panel__eyebrow">EUR FX operating picture</p>
               <h1>Capital Risk Intelligence</h1>
               <p className="hero-panel__copy">{activeTabConfig.description}</p>
+              <div className="hero-panel__terminal">
+                {terminalLines.map((line) => (
+                  <span key={line}>{line}</span>
+                ))}
+              </div>
               <div className="hero-panel__coords">
                 <span>Sector // EUR/{effectiveFocusCurrency}</span>
                 <span>Window // {lookbackDays}D</span>
@@ -620,6 +639,7 @@ function App() {
               className={`tab-strip__button ${activeTab === tab.id ? 'tab-strip__button--active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
             >
+              <span className="tab-strip__module">{tab.module}</span>
               <span className="tab-strip__eyebrow">{tab.eyebrow}</span>
               <strong className="tab-strip__title">{tab.label}</strong>
               <span className="tab-strip__detail">{tab.description}</span>

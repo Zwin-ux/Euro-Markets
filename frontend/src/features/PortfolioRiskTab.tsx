@@ -26,6 +26,7 @@ export function PortfolioRiskTab({ analysis }: PortfolioRiskTabProps) {
     <div className="page-grid">
       <SectionTitle
         eyebrow="Filtered slice"
+        command="fx.risk --slice active --rank exposure"
         title="Portfolio Risk"
         description="Use the filters in the control rail to narrow the portfolio. The ranked ledger below stays centered on concentration first."
       />

@@ -45,32 +45,33 @@ export function TimeSeriesChart({ title, data, xKey, series, height = 320 }: Tim
       <div className="chart-shell" style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <CartesianGrid stroke="rgba(113, 147, 122, 0.18)" vertical={false} />
+            <CartesianGrid stroke="rgba(182, 255, 199, 0.14)" strokeDasharray="4 6" vertical={false} />
             <XAxis
               dataKey={xKey}
               tickFormatter={(value) => formatDateLabel(String(value))}
-              tick={{ fill: '#8fa593', fontSize: 12 }}
-              axisLine={{ stroke: 'rgba(113, 147, 122, 0.18)' }}
+              tick={{ fill: '#b6ffc7', fontSize: 12 }}
+              axisLine={{ stroke: 'rgba(182, 255, 199, 0.14)' }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: '#8fa593', fontSize: 12 }}
-              axisLine={{ stroke: 'rgba(113, 147, 122, 0.18)' }}
+              tick={{ fill: '#b6ffc7', fontSize: 12 }}
+              axisLine={{ stroke: 'rgba(182, 255, 199, 0.14)' }}
               tickLine={false}
               width={80}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#0b1510',
-                border: '1px solid rgba(113, 147, 122, 0.28)',
-                borderRadius: '14px',
+                backgroundColor: '#08110b',
+                border: '1px solid rgba(182, 255, 199, 0.24)',
+                borderRadius: '8px',
+                boxShadow: '0 12px 28px rgba(0, 0, 0, 0.32)',
               }}
               labelFormatter={(value) => formatDateLabel(String(value))}
               formatter={(value, _name, item) =>
                 formatTooltipValue(Number(value), series.find((entry) => entry.key === item.dataKey)?.valueType)
               }
             />
-            <Legend wrapperStyle={{ color: '#d9e6db', fontSize: 12 }} />
+            <Legend wrapperStyle={{ color: '#d9e6db', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }} />
             {series.map((entry) => (
               <Line
                 key={entry.key}
@@ -78,9 +79,9 @@ export function TimeSeriesChart({ title, data, xKey, series, height = 320 }: Tim
                 dataKey={entry.key}
                 name={entry.label}
                 stroke={entry.color}
-                strokeWidth={2.6}
+                strokeWidth={2.3}
                 dot={false}
-                activeDot={{ r: 5 }}
+                activeDot={{ r: 5, stroke: '#f3faf0', strokeWidth: 1.5 }}
               />
             ))}
           </LineChart>

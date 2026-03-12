@@ -18,6 +18,7 @@ export function DataApiTab({ health, template, currencyCatalog, market, lookback
     <div className="page-grid">
       <SectionTitle
         eyebrow="Reference layer"
+        command="fx.reference --inspect feed --show routes"
         title="Data & API"
         description="Source freshness, sample inputs, and the API contract that powers the web app."
       />

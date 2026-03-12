@@ -34,6 +34,7 @@ export function OverviewTab({
     <div className="page-grid">
       <SectionTitle
         eyebrow="Operator view"
+        command="fx.overview --focus live --uplink ecb"
         title="Overview"
         description="Start with the live market picture. Portfolio analysis only spins up after you load a sample book or upload a CSV."
       />

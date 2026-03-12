@@ -34,6 +34,7 @@ export function StressTestTab({
     <div className="page-grid">
       <SectionTitle
         eyebrow="What-if analysis"
+        command="fx.scenario --commit shocks --observe pnl"
         title="Stress Test"
         description="Set directional shocks and apply them deliberately. The scenario engine only reruns when you commit the draft."
       />
