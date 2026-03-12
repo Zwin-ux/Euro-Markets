@@ -73,7 +73,7 @@ Render setup:
 
 For Railway, use service-specific config files when multiple services are created from the same repository:
 
-- API service: `railway.json`
+- API service: `railway.api.json`
 - Dashboard service: `railway.dashboard.json`
 - Refresh job: `railway.refresh.json`
 
