@@ -15,6 +15,21 @@ from data_ingestion.clean_data import clean_exchange_rates
 from data_ingestion.fetch_data import fetch_multi_currency_history
 
 SCHEMA_PATH = Path(__file__).with_name("schema.sql")
+DEFAULT_DATABASE_URL = "sqlite:///capital_risk.db"
+
+
+def resolve_database_url(database_url: str | None) -> str:
+    resolved = (database_url or DEFAULT_DATABASE_URL).strip()
+    if not resolved:
+        return DEFAULT_DATABASE_URL
+
+    if resolved.startswith("postgres://"):
+        return resolved.replace("postgres://", "postgresql+psycopg2://", 1)
+
+    if resolved.startswith("postgresql://") and "+psycopg" not in resolved and "+psycopg2" not in resolved:
+        return resolved.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+    return resolved
 
 
 def apply_schema(engine) -> None:
@@ -26,7 +41,7 @@ def apply_schema(engine) -> None:
 
 def load_exchange_rates(frame: pd.DataFrame, table_name: str = "exchange_rates") -> None:
     load_dotenv()
-    database_url = os.getenv("DATABASE_URL", "sqlite:///capital_risk.db")
+    database_url = resolve_database_url(os.getenv("DATABASE_URL"))
     engine = create_engine(database_url)
     cleaned = clean_exchange_rates(frame)
     if cleaned.empty:
