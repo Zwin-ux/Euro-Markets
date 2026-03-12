@@ -1,6 +1,6 @@
 # Capital Risk Intelligence
 
-Capital Risk Intelligence is an ECB-backed FX risk platform for market monitoring and portfolio analysis. It pulls euro foreign exchange reference rates through the free Euro Rates API, normalizes the data, exposes a FastAPI backend, and delivers a Streamlit dashboard with portfolio upload, EUR exposure breakdowns, rolling volatility, historical VaR, and scenario analysis.
+Capital Risk Intelligence is an ECB-backed FX risk platform for market monitoring and portfolio analysis. It pulls euro foreign exchange reference rates through the free Euro Rates API, normalizes the data, exposes a FastAPI backend, and delivers a React frontend for portfolio upload, EUR exposure breakdowns, rolling volatility, historical VaR, and scenario analysis.
 
 ## Why This Project Exists
 
@@ -10,7 +10,7 @@ The goal is to show end-to-end engineering ownership instead of a single noteboo
 - normalize and store it for reuse
 - compute portfolio-aware risk metrics
 - expose the analysis through an API
-- ship a dashboard for non-technical users
+- ship a browser-native frontend for non-technical users
 - package the whole thing with tests, Docker, and CI
 
 ## Features
@@ -21,16 +21,18 @@ The goal is to show end-to-end engineering ownership instead of a single noteboo
 - 1-day FX P&L, historical VaR, and annualized volatility
 - scenario analysis with custom currency shocks
 - FastAPI endpoints for market and portfolio analytics
+- React + TypeScript frontend with a dedicated Railway deploy target
 - SQLite persistence and refresh script for local rate storage
 
 ## Project Structure
 
 - `analytics/`: FX and portfolio risk calculations
 - `api/`: FastAPI application and request models
-- `dashboard/`: Streamlit dashboard
+- `frontend/`: React + TypeScript client application
 - `data/`: sample portfolio input
 - `data_ingestion/`: Euro Rates API fetchers and data cleaning
 - `database/`: schema and load logic
+- `dashboard/`: legacy Streamlit prototype retained for reference
 - `docs/`: architecture notes
 - `scripts/`: utility scripts
 - `services/`: shared market and portfolio service layer
@@ -41,35 +43,19 @@ The goal is to show end-to-end engineering ownership instead of a single noteboo
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python -m pip install -r requirements.txt
-copy .env.example .env
-.\.venv\Scripts\python -m streamlit run dashboard\app.py
-```
-
-PowerShell activation is optional. If you want the API as well:
-
-```powershell
 .\.venv\Scripts\python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+cd frontend
+npm.cmd install
+npm.cmd run dev
 ```
+
+The Vite dev server proxies `/api` requests to `http://localhost:8000`.
 
 ## Deployment
 
-GitHub Pages is not a fit for the app itself. GitHub Pages is a static hosting service for HTML, CSS, and JavaScript, while this project needs Python processes for Streamlit and FastAPI.
+GitHub Pages is not a fit for the app itself. GitHub Pages is a static hosting service for HTML, CSS, and JavaScript, while this project needs a Python API and a separately deployed web client.
 
 Use GitHub Pages only if you want a static landing page or documentation site that links to the live app.
-
-For the actual product, the repo now includes `render.yaml` so you can deploy:
-
-- a public FastAPI service
-- a public Streamlit dashboard
-- a scheduled refresh job
-- a managed Postgres database
-
-Render setup:
-
-1. Push this repo to GitHub.
-2. In Render, create a new Blueprint from the repository.
-3. Render will read `render.yaml` and provision the services and database.
-4. Add custom domains in Render after the first deploy if you want branded URLs.
 
 For Railway, use service-specific config files when multiple services are created from the same repository:
 
@@ -77,13 +63,18 @@ For Railway, use service-specific config files when multiple services are create
 - Dashboard service: `railway.dashboard.json`
 - Refresh job: `railway.refresh.json`
 
+For the dashboard service, also set:
+
+- Dockerfile path: `frontend/Dockerfile`
+- Environment variable: `API_UPSTREAM=http://capital-risk-api.railway.internal:8000`
+
 ## Docker
 
 ```powershell
 docker compose up --build
 ```
 
-- Dashboard: `http://localhost:8501`
+- Frontend: `http://localhost:3000`
 - API docs: `http://localhost:8000/docs`
 
 ## Environment
