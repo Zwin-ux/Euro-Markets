@@ -71,6 +71,12 @@ Render setup:
 3. Render will read `render.yaml` and provision the services and database.
 4. Add custom domains in Render after the first deploy if you want branded URLs.
 
+For Railway, use service-specific config files when multiple services are created from the same repository:
+
+- API service: `railway.json`
+- Dashboard service: `railway.dashboard.json`
+- Refresh job: `railway.refresh.json`
+
 ## Docker
 
 ```powershell
