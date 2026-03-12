@@ -4,6 +4,7 @@ from datetime import date
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 
 import services.market_service as market_service
 from api.schemas import PortfolioAnalysisRequest
@@ -14,6 +15,14 @@ app = FastAPI(
     title="Capital Risk Intelligence API",
     version="1.0.0",
     description="ECB-backed FX market intelligence and portfolio risk analytics.",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

@@ -8,8 +8,22 @@ import type {
   Frequency,
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api';
 const REQUEST_TIMEOUT_MS = 15_000;
+
+function inferRailwayApiBaseUrl(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const host = window.location.host;
+  if (host.includes('capital-risk-dashboard') && host.includes('.up.railway.app')) {
+    return `${window.location.protocol}//${host.replace('capital-risk-dashboard', 'capital-risk-api')}`;
+  }
+
+  return null;
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? inferRailwayApiBaseUrl() ?? '/api';
 
 type MarketMonitorParams = {
   focusCurrency: string;
@@ -43,9 +57,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new Error('The API request timed out. Check the dashboard API proxy or backend service.');
+      throw new Error(`The API request timed out. Current API base: ${API_BASE_URL}`);
     }
-    throw new Error('The dashboard could not reach the API. Check the API upstream setting and redeploy.');
+    throw new Error(`The dashboard could not reach the API. Current API base: ${API_BASE_URL}`);
   } finally {
     window.clearTimeout(timeoutId);
   }
@@ -58,7 +72,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       // Ignore JSON parse failures on error payloads.
     }
-    throw new Error(detail || 'Request failed');
+    throw new Error(detail || `API request failed (${response.status}) for ${path}`);
   }
 
   return (await response.json()) as T;

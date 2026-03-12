@@ -23,6 +23,12 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["status"], "ok")
 
+    def test_health_endpoint_includes_cors_headers(self) -> None:
+        response = self.client.get("/health", headers={"Origin": "https://capital-risk-dashboard-production.up.railway.app"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers.get("access-control-allow-origin"), "*")
+
     def test_portfolio_template_returns_sample_data(self) -> None:
         response = self.client.get("/portfolio/template")
 
