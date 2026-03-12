@@ -5,7 +5,7 @@
   },
   "deploy": {
     "startCommand": "python -u scripts/refresh_exchange_rates.py",
-    "cronSchedule": "0 6 * * 1-5",
+    "cronSchedule": "0 13 * * 1-5",
     "restartPolicyType": "NEVER"
   }
 }

@@ -1,19 +1,42 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Rajdhani:wght@500;600;700&display=swap');
 
 :root {
-  color: #edf6eb;
+  --bg-0: #050804;
+  --bg-1: #0a0f09;
+  --bg-2: #101812;
+  --bg-3: #162119;
+  --panel-0: rgba(10, 15, 11, 0.92);
+  --panel-1: rgba(14, 22, 16, 0.94);
+  --panel-2: rgba(20, 29, 22, 0.95);
+  --line-faint: rgba(154, 190, 139, 0.12);
+  --line-soft: rgba(154, 190, 139, 0.18);
+  --line-strong: rgba(180, 214, 160, 0.32);
+  --text-primary: #edf5e8;
+  --text-secondary: #b8c5b3;
+  --text-muted: #8f9d8d;
+  --accent-green: #9df4a5;
+  --accent-green-strong: #b6ffc7;
+  --accent-amber: #f0c972;
+  --accent-red: #f18f67;
+  --accent-cyan: #87d9c9;
+  --shadow-lg: 0 24px 80px rgba(0, 0, 0, 0.42);
+  --shadow-md: 0 14px 36px rgba(0, 0, 0, 0.28);
+  color: var(--text-primary);
   background:
-    radial-gradient(circle at top left, rgba(122, 240, 162, 0.08), transparent 22%),
-    radial-gradient(circle at right 15%, rgba(245, 197, 107, 0.08), transparent 20%),
-    linear-gradient(180deg, #050b08, #08110d);
+    radial-gradient(circle at top left, rgba(157, 244, 165, 0.09), transparent 22%),
+    radial-gradient(circle at top right, rgba(240, 201, 114, 0.08), transparent 18%),
+    linear-gradient(180deg, #040603, #09100b 55%, #0d130f);
   font-family: 'IBM Plex Mono', monospace;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -24,15 +47,55 @@ body,
   margin: 0;
 }
 
+html {
+  background: var(--bg-0);
+}
+
 body {
   min-height: 100vh;
-  background-image:
-    linear-gradient(rgba(122, 240, 162, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(122, 240, 162, 0.035) 1px, transparent 1px),
-    radial-gradient(circle at top left, rgba(122, 240, 162, 0.08), transparent 24%),
-    linear-gradient(180deg, #050b08, #08110d);
-  background-size: 28px 28px, 28px 28px, auto, auto;
-  background-attachment: fixed;
+  color: var(--text-primary);
+  background:
+    radial-gradient(circle at 18% 12%, rgba(157, 244, 165, 0.08), transparent 24%),
+    radial-gradient(circle at 78% 14%, rgba(240, 201, 114, 0.06), transparent 18%),
+    linear-gradient(180deg, #060904, #0a100b 52%, #0d130f);
+  overflow-x: hidden;
+}
+
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+body::before {
+  background:
+    linear-gradient(rgba(157, 244, 165, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(157, 244, 165, 0.03) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(240, 201, 114, 0.035), transparent 18%, transparent 82%, rgba(157, 244, 165, 0.02));
+  background-size: 40px 40px, 40px 40px, auto;
+  opacity: 0.72;
+}
+
+body::after {
+  background:
+    radial-gradient(circle at 14% 18%, rgba(157, 244, 165, 0.08), transparent 20%),
+    radial-gradient(circle at 82% 28%, rgba(240, 201, 114, 0.06), transparent 16%),
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.015) 0,
+      rgba(255, 255, 255, 0.015) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  opacity: 0.3;
+  mix-blend-mode: screen;
+}
+
+#root {
+  position: relative;
+  isolation: isolate;
 }
 
 button,
@@ -40,8 +103,30 @@ input,
 select,
 textarea {
   font: inherit;
+  color: inherit;
 }
 
 a {
   color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(157, 244, 165, 0.18);
+  color: #f5fdf5;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(6, 9, 7, 0.96);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(6, 9, 7, 0.96);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(157, 244, 165, 0.34), rgba(240, 201, 114, 0.28));
 }

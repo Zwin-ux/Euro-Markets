@@ -359,7 +359,7 @@ function App() {
         <section className="rail-panel">
           <span className="rail-panel__eyebrow">Mission control</span>
           <h2>Command rail</h2>
-          <p>Load a portfolio, pick the focus pair, and only open deeper model settings when the default view is not enough.</p>
+          <p>Stage the live EUR view, load a portfolio when you need risk, then narrow the slice before committing scenarios.</p>
           <div className="rail-signal-list">
             {railSignals.map((signal) => (
               <article key={signal.label} className="rail-signal">
@@ -532,6 +532,11 @@ function App() {
               <p className="hero-panel__eyebrow">EUR FX operating picture</p>
               <h1>Capital Risk Intelligence</h1>
               <p className="hero-panel__copy">{activeTabConfig.description}</p>
+              <div className="hero-panel__coords">
+                <span>Sector // EUR/{effectiveFocusCurrency}</span>
+                <span>Window // {lookbackDays}D</span>
+                <span>Cadence // {frequency}</span>
+              </div>
               <div className="hero-panel__signalbar">
                 <article className="hero-signal">
                   <span>Primary watch</span>
@@ -623,7 +628,7 @@ function App() {
           ))}
         </nav>
 
-        {isPending ? <div className="inline-status">Refreshing the current view...</div> : null}
+        {isPending ? <div className="inline-status" role="status">Refreshing the current view...</div> : null}
 
         <Suspense fallback={<div className="app-state">Loading the view...</div>}>
           {activeTab === 'overview' ? (
