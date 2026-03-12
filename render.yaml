@@ -1,0 +1,72 @@
+services:
+  - type: web
+    name: capital-risk-api
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: /bin/sh -c "uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-10000}"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: capital-risk-db
+          property: connectionString
+      - key: EURO_RATES_API_BASE_URL
+        value: https://api.euroratesapi.dev
+      - key: DEFAULT_TARGET_CURRENCIES
+        value: USD,GBP,CHF,JPY,AUD,CAD
+      - key: DATA_REFRESH_LOOKBACK_DAYS
+        value: 365
+      - key: REQUEST_TIMEOUT_SECONDS
+        value: 60
+
+  - type: web
+    name: capital-risk-dashboard
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: /bin/sh -c "streamlit run dashboard/app.py --server.address 0.0.0.0 --server.port ${PORT:-10000}"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: capital-risk-db
+          property: connectionString
+      - key: EURO_RATES_API_BASE_URL
+        value: https://api.euroratesapi.dev
+      - key: DEFAULT_TARGET_CURRENCIES
+        value: USD,GBP,CHF,JPY,AUD,CAD
+      - key: DATA_REFRESH_LOOKBACK_DAYS
+        value: 365
+      - key: REQUEST_TIMEOUT_SECONDS
+        value: 60
+
+  - type: cron
+    name: capital-risk-refresh
+    runtime: docker
+    plan: free
+    region: oregon
+    schedule: "0 6 * * 1-5"
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: /bin/sh -c "python scripts/refresh_exchange_rates.py"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: capital-risk-db
+          property: connectionString
+      - key: EURO_RATES_API_BASE_URL
+        value: https://api.euroratesapi.dev
+      - key: DEFAULT_TARGET_CURRENCIES
+        value: USD,GBP,CHF,JPY,AUD,CAD
+      - key: DATA_REFRESH_LOOKBACK_DAYS
+        value: 365
+      - key: REQUEST_TIMEOUT_SECONDS
+        value: 60
+
+databases:
+  - name: capital-risk-db
+    plan: free

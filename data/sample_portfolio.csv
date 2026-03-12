@@ -1,0 +1,7 @@
+position_id,position_name,asset_class,book,currency,market_value_local
+EQ-USD-01,US Equity Sleeve,Equity,Global Macro,USD,250000
+BOND-GBP-01,UK Gilts,Bonds,Macro Rates,GBP,180000
+CASH-CHF-01,Swiss Cash,Cash,Treasury,CHF,120000
+EQ-JPY-01,Japan Equity Basket,Equity,Asia,JPY,35000000
+CASH-EUR-01,Euro Operating Cash,Cash,Treasury,EUR,95000
+ALT-AUD-01,Australia Metals Overlay,Alternatives,Commodities,AUD,210000
