@@ -14,6 +14,11 @@ type OverviewTabProps = {
 
 export function OverviewTab({ focusCurrency, market, analysis }: OverviewTabProps) {
   const topExposure = analysis.currency_exposure.find((row) => row.currency !== 'EUR');
+  const worstScenario =
+    analysis.scenario_analysis
+      .slice()
+      .sort((left, right) => left.scenario_pnl_eur - right.scenario_pnl_eur)
+      .find((row) => row.scenario_pnl_eur !== 0) ?? analysis.scenario_analysis[0];
 
   return (
     <div className="page-grid">
@@ -22,6 +27,32 @@ export function OverviewTab({ focusCurrency, market, analysis }: OverviewTabProp
         title="Overview"
         description="Start with the high-level risk picture, then drill into the cross and exposure that deserve attention first."
       />
+
+      <div className="brief-grid">
+        <article className="brief-card">
+          <span className="brief-card__label">Monitor next</span>
+          <strong>{topExposure?.currency ?? 'EUR only'}</strong>
+          <p>
+            {topExposure
+              ? `${formatCurrency(topExposure.value_eur)} currently sits at the top of the exposure stack.`
+              : 'The current slice is fully EUR-denominated.'}
+          </p>
+        </article>
+        <article className="brief-card">
+          <span className="brief-card__label">Market regime</span>
+          <strong>{formatPercent(market.summary.annualized_volatility, 1)}</strong>
+          <p>{formatPercent(market.summary.max_drawdown, 1)} drawdown on the focus pair over the selected window.</p>
+        </article>
+        <article className="brief-card">
+          <span className="brief-card__label">Shock sensitivity</span>
+          <strong>{worstScenario?.currency ?? 'Flat'}</strong>
+          <p>
+            {worstScenario
+              ? `${formatCurrency(worstScenario.scenario_pnl_eur, { signed: true })} under the simple scenario deck.`
+              : 'No scenario sensitivity available.'}
+          </p>
+        </article>
+      </div>
 
       <div className="metric-grid metric-grid--five">
         <MetricCard label="Portfolio value" value={formatCurrency(analysis.summary.portfolio_value_eur)} />

@@ -5,8 +5,14 @@ import { useQuery } from '@tanstack/react-query';
 import './App.css';
 import { MetricCard } from './components/MetricCard';
 import { ToggleFilterGroup } from './components/ToggleFilterGroup';
-import { fetchCurrencyCatalog, fetchHealth, fetchMarketMonitor, fetchPortfolioTemplate, analyzePortfolio } from './lib/api';
-import { formatCurrency, formatLongDate, formatPercent } from './lib/format';
+import {
+  analyzePortfolio,
+  fetchCurrencyCatalog,
+  fetchHealth,
+  fetchMarketMonitor,
+  fetchPortfolioTemplate,
+} from './lib/api';
+import { formatCurrency, formatLongDate, formatPercent, formatRate } from './lib/format';
 import {
   buildScenarioDraft,
   filterPortfolioRows,
@@ -15,7 +21,8 @@ import {
   uniqueAssetClasses,
   uniqueBooks,
 } from './lib/portfolio';
-import type { Frequency, PositionInput, ScenarioDraftRow } from './types';
+import type { Frequency, PositionInput, ScenarioDraftRow, ScenarioPresetOption } from './types';
+
 const OverviewTab = lazy(async () => import('./features/OverviewTab').then((module) => ({ default: module.OverviewTab })));
 const PortfolioRiskTab = lazy(async () =>
   import('./features/PortfolioRiskTab').then((module) => ({ default: module.PortfolioRiskTab })),
@@ -29,6 +36,54 @@ type TabId = 'overview' | 'risk' | 'stress' | 'data';
 
 const DEFAULT_MARKET_CURRENCIES = ['USD', 'GBP', 'CHF', 'JPY', 'AUD', 'CAD'];
 
+const TAB_CONFIG: Array<{ id: TabId; label: string; eyebrow: string; description: string }> = [
+  {
+    id: 'overview',
+    label: 'Overview',
+    eyebrow: 'Live picture',
+    description: 'Start with the market pulse, the biggest exposure, and the pair that deserves attention first.',
+  },
+  {
+    id: 'risk',
+    label: 'Portfolio Risk',
+    eyebrow: 'Concentration',
+    description: 'Narrow the book, then inspect exposure, volatility, and the positions driving the current footprint.',
+  },
+  {
+    id: 'stress',
+    label: 'Stress Test',
+    eyebrow: 'Scenario work',
+    description: 'Run deliberate shocks and compare which currencies swing the portfolio hardest under pressure.',
+  },
+  {
+    id: 'data',
+    label: 'Data & API',
+    eyebrow: 'Reference',
+    description: 'Check freshness, sample inputs, and the payload contract behind the frontend.',
+  },
+];
+
+const SCENARIO_PRESETS: Array<ScenarioPresetOption & { shocks: Record<string, number> }> = [
+  {
+    id: 'broad-eur-rally',
+    label: 'EUR +3% broad',
+    description: 'Moderate broad strengthening across the main non-EUR currencies.',
+    shocks: { USD: 3, GBP: 2, CHF: 1, JPY: 2, AUD: 4, CAD: 3 },
+  },
+  {
+    id: 'usd-squeeze',
+    label: 'EUR +5% vs USD',
+    description: 'Single-pair squeeze to see how much of the book is really USD-led.',
+    shocks: { USD: 5 },
+  },
+  {
+    id: 'commodity-reversal',
+    label: 'EUR -4% vs AUD/CAD',
+    description: 'Commodity bloc reversal with EUR weakness against higher-beta currencies.',
+    shocks: { AUD: -4, CAD: -4 },
+  },
+];
+
 function buildFilterSelection(
   positions: PositionInput[],
   selectedBooks: string[],
@@ -36,10 +91,6 @@ function buildFilterSelection(
 ) {
   const bookOptions = uniqueBooks(positions);
   const assetOptions = uniqueAssetClasses(positions);
-
-  if ((bookOptions.length > 0 && selectedBooks.length === 0) || (assetOptions.length > 0 && selectedAssetClasses.length === 0)) {
-    return { bookOptions, assetOptions, filtered: [] as PositionInput[] };
-  }
 
   return {
     bookOptions,
@@ -50,6 +101,29 @@ function buildFilterSelection(
 
 function toggleSelection(current: string[], option: string) {
   return current.includes(option) ? current.filter((item) => item !== option) : [...current, option];
+}
+
+function summarizeSelection(selected: string[], total: number) {
+  if (total === 0) {
+    return 'No options available';
+  }
+  if (selected.length === 0) {
+    return 'No filter applied';
+  }
+  if (selected.length === total) {
+    return 'All active';
+  }
+  return `${selected.length}/${total} active`;
+}
+
+function buildScenarioPresetDraft(
+  rows: ScenarioDraftRow[],
+  preset: Record<string, number>,
+): ScenarioDraftRow[] {
+  return rows.map((row) => ({
+    ...row,
+    shockPct: preset[row.currency] !== undefined ? String(preset[row.currency]) : '',
+  }));
 }
 
 function App() {
@@ -225,6 +299,19 @@ function App() {
     });
   }
 
+  function handleApplyScenarioPreset(presetId: string) {
+    const preset = SCENARIO_PRESETS.find((entry) => entry.id === presetId);
+    if (!preset) {
+      return;
+    }
+
+    const nextDraft = buildScenarioPresetDraft(syncedScenarioDraftRows, preset.shocks);
+    startTransition(() => {
+      setDraftScenarioRows(nextDraft);
+      setCommittedScenarioShocks(scenarioDraftToPayload(nextDraft));
+    });
+  }
+
   if (baseError instanceof Error) {
     return <div className="app-state">{baseError.message}</div>;
   }
@@ -233,13 +320,63 @@ function App() {
     return <div className="app-state">Loading the operating picture...</div>;
   }
 
+  const overviewAnalysis = overviewAnalysisQuery.data;
+  const market = marketQuery.data;
+  const activeTabConfig = TAB_CONFIG.find((tab) => tab.id === activeTab) ?? TAB_CONFIG[0];
+  const topExposure = overviewAnalysis.currency_exposure.find((row) => row.currency !== 'EUR');
+  const activeShockCount = Object.keys(committedScenarioShocks).length;
+  const worstScenario =
+    overviewAnalysis.scenario_analysis
+      .slice()
+      .sort((left, right) => left.scenario_pnl_eur - right.scenario_pnl_eur)
+      .find((row) => row.scenario_pnl_eur !== 0) ?? overviewAnalysis.scenario_analysis[0];
+
+  const tabMeta: Record<TabId, string> = {
+    overview: `Focus EUR/${effectiveFocusCurrency}`,
+    risk: `${riskSelection.filtered.length} rows in scope`,
+    stress: activeShockCount === 0 ? 'No live shocks' : `${activeShockCount} live shocks`,
+    data: `${currencyOptions.length} supported currencies`,
+  };
+
+  const railSignals = [
+    {
+      label: 'Current view',
+      value: activeTabConfig.label,
+      detail: activeTabConfig.eyebrow,
+    },
+    {
+      label: 'Portfolio load',
+      value: deferredPortfolioRows.length.toLocaleString('en-US'),
+      detail: portfolioSource,
+    },
+    {
+      label: 'Priority watch',
+      value: topExposure?.currency ?? 'EUR only',
+      detail: topExposure ? formatCurrency(topExposure.value_eur, { compact: true }) : 'No non-EUR exposure',
+    },
+    {
+      label: 'Scenario state',
+      value: activeShockCount.toLocaleString('en-US'),
+      detail: activeShockCount === 0 ? 'No committed shocks' : 'Committed shocks ready',
+    },
+  ];
+
   return (
     <div className="app-shell">
       <aside className="control-rail">
         <section className="rail-panel">
-          <span className="rail-panel__eyebrow">Core inputs</span>
-          <h2>Control rail</h2>
-          <p>Change the focus pair, load a book, and only adjust model inputs when you actually need to.</p>
+          <span className="rail-panel__eyebrow">Mission control</span>
+          <h2>Command rail</h2>
+          <p>Load a portfolio, pick the focus pair, and only open deeper model settings when the default view is not enough.</p>
+          <div className="rail-signal-list">
+            {railSignals.map((signal) => (
+              <article key={signal.label} className="rail-signal">
+                <span>{signal.label}</span>
+                <strong>{signal.value}</strong>
+                <p>{signal.detail}</p>
+              </article>
+            ))}
+          </div>
         </section>
 
         <label className="control-group">
@@ -279,6 +416,15 @@ function App() {
               label="Books"
               options={activeTab === 'risk' ? riskSelection.bookOptions : stressSelection.bookOptions}
               selected={activeTab === 'risk' ? riskBooks : stressBooks}
+              summary={summarizeSelection(
+                activeTab === 'risk' ? riskBooks : stressBooks,
+                activeTab === 'risk' ? riskSelection.bookOptions.length : stressSelection.bookOptions.length,
+              )}
+              onSelectAll={() =>
+                activeTab === 'risk'
+                  ? setRiskBooks(riskSelection.bookOptions)
+                  : setStressBooks(stressSelection.bookOptions)
+              }
               onToggle={(option) =>
                 activeTab === 'risk'
                   ? setRiskBooks((current) => toggleSelection(current, option))
@@ -289,6 +435,15 @@ function App() {
               label="Asset classes"
               options={activeTab === 'risk' ? riskSelection.assetOptions : stressSelection.assetOptions}
               selected={activeTab === 'risk' ? riskAssetClasses : stressAssetClasses}
+              summary={summarizeSelection(
+                activeTab === 'risk' ? riskAssetClasses : stressAssetClasses,
+                activeTab === 'risk' ? riskSelection.assetOptions.length : stressSelection.assetOptions.length,
+              )}
+              onSelectAll={() =>
+                activeTab === 'risk'
+                  ? setRiskAssetClasses(riskSelection.assetOptions)
+                  : setStressAssetClasses(stressSelection.assetOptions)
+              }
               onToggle={(option) =>
                 activeTab === 'risk'
                   ? setRiskAssetClasses((current) => toggleSelection(current, option))
@@ -298,12 +453,21 @@ function App() {
           </section>
         )}
 
-        <section className="rail-panel rail-panel--compact">
-          <span className="rail-panel__eyebrow">Advanced settings</span>
+        <details className="rail-expander">
+          <summary>
+            <div>
+              <span className="rail-panel__eyebrow">Advanced settings</span>
+              <strong>Market window and model controls</strong>
+            </div>
+            <span>{lookbackDays}d / {Math.round(confidenceLevel * 100)}% / {rollingWindow}</span>
+          </summary>
+          <div className="rail-expander__body">
             <ToggleFilterGroup
               label="Snapshot currencies"
               options={currencyOptions}
               selected={effectiveMarketCurrencies}
+              summary={`${effectiveMarketCurrencies.length}/${currencyOptions.length || 0} active`}
+              onSelectAll={() => setMarketCurrencies(currencyOptions)}
               onToggle={(option) =>
                 setMarketCurrencies((current) => {
                   const next = toggleSelection(current, option);
@@ -312,34 +476,56 @@ function App() {
               }
             />
 
-          <label className="control-group">
-            <span className="control-group__label">Frequency</span>
-            <select value={frequency} onChange={(event) => setFrequency(event.target.value as Frequency)}>
-              <option value="D">Daily</option>
-              <option value="M">Monthly</option>
-              <option value="Q">Quarterly</option>
-              <option value="A">Annual</option>
-            </select>
-          </label>
+            <label className="control-group">
+              <span className="control-group__label">Frequency</span>
+              <select value={frequency} onChange={(event) => setFrequency(event.target.value as Frequency)}>
+                <option value="D">Daily</option>
+                <option value="M">Monthly</option>
+                <option value="Q">Quarterly</option>
+                <option value="A">Annual</option>
+              </select>
+            </label>
 
-          <label className="control-group">
-            <span className="control-group__label">Lookback window</span>
-            <input type="range" min="30" max="365" step="30" value={lookbackDays} onChange={(event) => setLookbackDays(Number(event.target.value))} />
-            <strong>{lookbackDays} days</strong>
-          </label>
+            <label className="control-group">
+              <span className="control-group__label">Lookback window</span>
+              <input
+                type="range"
+                min="30"
+                max="365"
+                step="30"
+                value={lookbackDays}
+                onChange={(event) => setLookbackDays(Number(event.target.value))}
+              />
+              <strong>{lookbackDays} days</strong>
+            </label>
 
-          <label className="control-group">
-            <span className="control-group__label">VaR confidence</span>
-            <input type="range" min="0.8" max="0.99" step="0.01" value={confidenceLevel} onChange={(event) => setConfidenceLevel(Number(event.target.value))} />
-            <strong>{Math.round(confidenceLevel * 100)}%</strong>
-          </label>
+            <label className="control-group">
+              <span className="control-group__label">VaR confidence</span>
+              <input
+                type="range"
+                min="0.8"
+                max="0.99"
+                step="0.01"
+                value={confidenceLevel}
+                onChange={(event) => setConfidenceLevel(Number(event.target.value))}
+              />
+              <strong>{Math.round(confidenceLevel * 100)}%</strong>
+            </label>
 
-          <label className="control-group">
-            <span className="control-group__label">Rolling window</span>
-            <input type="range" min="5" max="60" step="1" value={rollingWindow} onChange={(event) => setRollingWindow(Number(event.target.value))} />
-            <strong>{rollingWindow} periods</strong>
-          </label>
-        </section>
+            <label className="control-group">
+              <span className="control-group__label">Rolling window</span>
+              <input
+                type="range"
+                min="5"
+                max="60"
+                step="1"
+                value={rollingWindow}
+                onChange={(event) => setRollingWindow(Number(event.target.value))}
+              />
+              <strong>{rollingWindow} periods</strong>
+            </label>
+          </div>
+        </details>
       </aside>
 
       <main className="workspace">
@@ -350,45 +536,78 @@ function App() {
             <span>{formatLongDate(healthQuery.data.date)}</span>
           </div>
           <div className="hero-panel__grid">
-            <div>
-              <p className="hero-panel__eyebrow">EUR risk command view</p>
+            <div className="hero-panel__brief">
+              <p className="hero-panel__eyebrow">EUR FX operating picture</p>
               <h1>Capital Risk Intelligence</h1>
-              <p className="hero-panel__copy">
-                A browser-native control room for EUR exchange-rate monitoring, portfolio concentration, and scenario work.
-              </p>
+              <p className="hero-panel__copy">{activeTabConfig.description}</p>
+              <div className="hero-panel__signalbar">
+                <article className="hero-signal">
+                  <span>Primary watch</span>
+                  <strong>{topExposure?.currency ?? 'EUR only'}</strong>
+                  <p>{topExposure ? formatCurrency(topExposure.value_eur) : 'No non-EUR exposure in scope'}</p>
+                </article>
+                <article className="hero-signal">
+                  <span>Market regime</span>
+                  <strong>{formatPercent(market.summary.annualized_volatility, 1)}</strong>
+                  <p>{formatPercent(market.summary.max_drawdown, 1)} max drawdown over the selected window</p>
+                </article>
+                <article className="hero-signal">
+                  <span>Scenario watch</span>
+                  <strong>{worstScenario?.currency ?? 'Flat'}</strong>
+                  <p>
+                    {worstScenario
+                      ? formatCurrency(worstScenario.scenario_pnl_eur, { signed: true })
+                      : 'No scenario sensitivity available'}
+                  </p>
+                </article>
+              </div>
             </div>
             <div className="hero-panel__metrics">
-              <MetricCard label="Largest FX exposure" value={overviewAnalysisQuery.data.currency_exposure.find((row) => row.currency !== 'EUR')?.currency ?? 'EUR only'} detail={formatCurrency(overviewAnalysisQuery.data.currency_exposure.find((row) => row.currency !== 'EUR')?.value_eur ?? 0)} />
-              <MetricCard label="Rates as of" value={formatLongDate(marketQuery.data.latest_snapshot[0]?.rate_date ?? healthQuery.data.date)} detail={`EUR/${effectiveFocusCurrency} in focus`} />
-              <MetricCard label="Portfolio rows" value={deferredPortfolioRows.length.toLocaleString('en-US')} detail={portfolioSource} />
-              <MetricCard label="Non-EUR share" value={formatPercent(overviewAnalysisQuery.data.summary.non_eur_share, 1)} detail={formatCurrency(overviewAnalysisQuery.data.summary.portfolio_value_eur, { compact: true })} />
+              <MetricCard
+                label="Largest FX exposure"
+                value={topExposure?.currency ?? 'EUR only'}
+                detail={formatCurrency(topExposure?.value_eur ?? 0)}
+              />
+              <MetricCard
+                label="Rates as of"
+                value={formatLongDate(market.latest_snapshot[0]?.rate_date ?? healthQuery.data.date)}
+                detail={`EUR/${effectiveFocusCurrency} at ${formatRate(market.summary.latest_rate)}`}
+              />
+              <MetricCard
+                label="Portfolio rows"
+                value={deferredPortfolioRows.length.toLocaleString('en-US')}
+                detail={portfolioSource}
+              />
+              <MetricCard
+                label="Non-EUR share"
+                value={formatPercent(overviewAnalysis.summary.non_eur_share, 1)}
+                detail={formatCurrency(overviewAnalysis.summary.portfolio_value_eur, { compact: true })}
+              />
             </div>
           </div>
         </header>
 
         <nav className="tab-strip">
-          {[
-            { id: 'overview', label: 'Overview' },
-            { id: 'risk', label: 'Portfolio Risk' },
-            { id: 'stress', label: 'Stress Test' },
-            { id: 'data', label: 'Data & API' },
-          ].map((tab) => (
+          {TAB_CONFIG.map((tab) => (
             <button
               key={tab.id}
               type="button"
               className={`tab-strip__button ${activeTab === tab.id ? 'tab-strip__button--active' : ''}`}
-              onClick={() => setActiveTab(tab.id as TabId)}
+              onClick={() => setActiveTab(tab.id)}
             >
-              {tab.label}
+              <span className="tab-strip__eyebrow">{tab.eyebrow}</span>
+              <strong className="tab-strip__title">{tab.label}</strong>
+              <span className="tab-strip__detail">{tab.description}</span>
+              <span className="tab-strip__meta">{tabMeta[tab.id]}</span>
             </button>
           ))}
         </nav>
 
-        {isPending ? <div className="inline-status">Refreshing the view...</div> : null}
+        {isPending ? <div className="inline-status">Refreshing the current view...</div> : null}
 
         <Suspense fallback={<div className="app-state">Loading the view...</div>}>
           {activeTab === 'overview' ? (
-            <OverviewTab focusCurrency={effectiveFocusCurrency} market={marketQuery.data} analysis={overviewAnalysisQuery.data} />
+            <OverviewTab focusCurrency={effectiveFocusCurrency} market={market} analysis={overviewAnalysis} />
           ) : null}
 
           {activeTab === 'risk' ? (
@@ -408,7 +627,9 @@ function App() {
               <StressTestTab
                 analysis={stressAnalysisQuery.data}
                 draftRows={syncedScenarioDraftRows}
-                appliedShockCount={Object.keys(committedScenarioShocks).length}
+                presets={SCENARIO_PRESETS.map(({ id, label, description }) => ({ id, label, description }))}
+                appliedShockCount={activeShockCount}
+                onApplyPreset={handleApplyScenarioPreset}
                 onChangeDraft={(currency, value) =>
                   setDraftScenarioRows(
                     syncedScenarioDraftRows.map((row) =>
@@ -438,7 +659,7 @@ function App() {
               health={healthQuery.data}
               template={templateQuery.data}
               currencyCatalog={currencyQuery.data ?? []}
-              market={marketQuery.data}
+              market={market}
               lookbackDays={lookbackDays}
               frequency={frequency}
             />

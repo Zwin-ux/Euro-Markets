@@ -12,6 +12,16 @@ type PortfolioRiskTabProps = {
 };
 
 export function PortfolioRiskTab({ analysis }: PortfolioRiskTabProps) {
+  const topExposure = analysis.currency_exposure.find((row) => row.currency !== 'EUR') ?? analysis.currency_exposure[0];
+  const worstPnl =
+    analysis.currency_exposure
+      .slice()
+      .sort((left, right) => left.fx_pnl_1d_eur - right.fx_pnl_1d_eur)[0];
+  const topPositionRows = analysis.positions
+    .slice()
+    .sort((left, right) => Math.abs(right.value_eur) - Math.abs(left.value_eur))
+    .slice(0, 14);
+
   return (
     <div className="page-grid">
       <SectionTitle
@@ -19,6 +29,28 @@ export function PortfolioRiskTab({ analysis }: PortfolioRiskTabProps) {
         title="Portfolio Risk"
         description="Use the filters in the control rail to narrow the portfolio. The ranked ledger below stays centered on concentration first."
       />
+
+      <div className="brief-grid">
+        <article className="brief-card">
+          <span className="brief-card__label">Largest stack</span>
+          <strong>{topExposure?.currency ?? 'None'}</strong>
+          <p>{topExposure ? `${formatCurrency(topExposure.value_eur)} across ${topExposure.position_count} positions.` : 'No exposure rows available.'}</p>
+        </article>
+        <article className="brief-card">
+          <span className="brief-card__label">Weakest 1D move</span>
+          <strong>{worstPnl?.currency ?? 'Flat'}</strong>
+          <p>
+            {worstPnl
+              ? `${formatCurrency(worstPnl.fx_pnl_1d_eur, { signed: true })} in one-day FX P&L.`
+              : 'No daily P&L data available.'}
+          </p>
+        </article>
+        <article className="brief-card">
+          <span className="brief-card__label">Diversification</span>
+          <strong>{analysis.summary.currency_count.toLocaleString('en-US')} currencies</strong>
+          <p>{formatPercent(analysis.summary.non_eur_share, 1)} of value is outside EUR in the active slice.</p>
+        </article>
+      </div>
 
       <div className="metric-grid">
         <MetricCard label="Portfolio value" value={formatCurrency(analysis.summary.portfolio_value_eur)} />
@@ -84,7 +116,7 @@ export function PortfolioRiskTab({ analysis }: PortfolioRiskTabProps) {
             { key: 'currency', label: 'Currency' },
             { key: 'value', label: 'Value (EUR)', align: 'right' },
           ]}
-          rows={analysis.positions.slice(0, 14).map((row) => ({
+          rows={topPositionRows.map((row) => ({
             id: row.position_id,
             name: row.position_name,
             book: row.book || 'Unassigned',

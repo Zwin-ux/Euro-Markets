@@ -22,6 +22,24 @@ export function DataApiTab({ health, template, currencyCatalog, market, lookback
         description="Source freshness, sample inputs, and the API contract that powers the web app."
       />
 
+      <div className="brief-grid">
+        <article className="brief-card">
+          <span className="brief-card__label">Source</span>
+          <strong>ECB via Euro Rates API</strong>
+          <p>{health.status === 'ok' ? 'The backend is healthy and serving the latest upstream context.' : 'Backend status requires attention.'}</p>
+        </article>
+        <article className="brief-card">
+          <span className="brief-card__label">Coverage</span>
+          <strong>{currencyCatalog.length.toLocaleString('en-US')} currencies</strong>
+          <p>{market.latest_snapshot.length.toLocaleString('en-US')} currencies are in the active live snapshot.</p>
+        </article>
+        <article className="brief-card">
+          <span className="brief-card__label">Client mode</span>
+          <strong>{lookbackDays}d / {frequency}</strong>
+          <p>The frontend is currently requesting a {lookbackDays}-day window at {frequency} frequency.</p>
+        </article>
+      </div>
+
       <div className="metric-grid">
         <MetricCard label="Rates as of" value={formatLongDate(market.latest_snapshot[0]?.rate_date ?? health.date)} />
         <MetricCard label="Snapshot currencies" value={market.latest_snapshot.length.toLocaleString('en-US')} />

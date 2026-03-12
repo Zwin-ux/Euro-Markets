@@ -4,6 +4,7 @@
   color: #edf6eb;
   background:
     radial-gradient(circle at top left, rgba(122, 240, 162, 0.08), transparent 22%),
+    radial-gradient(circle at right 15%, rgba(245, 197, 107, 0.08), transparent 20%),
     linear-gradient(180deg, #050b08, #08110d);
   font-family: 'IBM Plex Mono', monospace;
   font-synthesis: none;
@@ -25,6 +26,13 @@ body,
 
 body {
   min-height: 100vh;
+  background-image:
+    linear-gradient(rgba(122, 240, 162, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122, 240, 162, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at top left, rgba(122, 240, 162, 0.08), transparent 24%),
+    linear-gradient(180deg, #050b08, #08110d);
+  background-size: 28px 28px, 28px 28px, auto, auto;
+  background-attachment: fixed;
 }
 
 button,

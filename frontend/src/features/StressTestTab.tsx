@@ -5,12 +5,14 @@ import { MetricCard } from '../components/MetricCard';
 import { SectionTitle } from '../components/SectionTitle';
 import { ValueBarChart } from '../components/ValueBarChart';
 import { formatCurrency, formatPercent } from '../lib/format';
-import type { PortfolioAnalysisResponse, ScenarioDraftRow } from '../types';
+import type { PortfolioAnalysisResponse, ScenarioDraftRow, ScenarioPresetOption } from '../types';
 
 type StressTestTabProps = {
   analysis: PortfolioAnalysisResponse;
   draftRows: ScenarioDraftRow[];
+  presets: ScenarioPresetOption[];
   appliedShockCount: number;
+  onApplyPreset: (presetId: string) => void;
   onChangeDraft: (currency: string, value: string) => void;
   onApplyScenario: () => void;
   onResetScenario: () => void;
@@ -19,7 +21,9 @@ type StressTestTabProps = {
 export function StressTestTab({
   analysis,
   draftRows,
+  presets,
   appliedShockCount,
+  onApplyPreset,
   onChangeDraft,
   onApplyScenario,
   onResetScenario,
@@ -34,11 +38,41 @@ export function StressTestTab({
         description="Set directional shocks and apply them deliberately. The scenario engine only reruns when you commit the draft."
       />
 
+      <div className="brief-grid">
+        <article className="brief-card">
+          <span className="brief-card__label">Scenario total</span>
+          <strong>{formatCurrency(analysis.summary.scenario_total_pnl_eur, { signed: true })}</strong>
+          <p>Net portfolio move under the currently committed scenario.</p>
+        </article>
+        <article className="brief-card">
+          <span className="brief-card__label">Weakest currency</span>
+          <strong>{worstRow?.currency ?? 'Flat'}</strong>
+          <p>{worstRow ? `${formatCurrency(worstRow.scenario_pnl_eur, { signed: true })} on the worst row.` : 'No active scenario result.'}</p>
+        </article>
+        <article className="brief-card">
+          <span className="brief-card__label">Committed shocks</span>
+          <strong>{appliedShockCount.toLocaleString('en-US')}</strong>
+          <p>
+            {appliedShockCount === 0 || draftRows.length === 0
+              ? 'Preset or manual shocks have not been committed yet.'
+              : formatPercent(appliedShockCount / draftRows.length, 0)}
+          </p>
+        </article>
+      </div>
+
       <div className="split-grid split-grid--narrow">
         <section className="panel">
           <div className="panel__header">
             <h3>Shock editor</h3>
             <span>Positive means EUR strengthens</span>
+          </div>
+          <div className="preset-strip">
+            {presets.map((preset) => (
+              <button key={preset.id} type="button" className="preset-card" onClick={() => onApplyPreset(preset.id)}>
+                <span>{preset.label}</span>
+                <strong>{preset.description}</strong>
+              </button>
+            ))}
           </div>
           <div className="shock-editor">
             {draftRows.map((row) => (

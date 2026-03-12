@@ -122,3 +122,9 @@ export type ScenarioDraftRow = {
   currency: string;
   shockPct: string;
 };
+
+export type ScenarioPresetOption = {
+  id: string;
+  label: string;
+  description: string;
+};
