@@ -9,6 +9,7 @@ import type {
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api';
+const REQUEST_TIMEOUT_MS = 15_000;
 
 type MarketMonitorParams = {
   focusCurrency: string;
@@ -27,13 +28,27 @@ type PortfolioAnalysisParams = {
 };
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...init?.headers,
-    },
-    ...init,
-  });
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...init?.headers,
+      },
+      ...init,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('The API request timed out. Check the dashboard API proxy or backend service.');
+    }
+    throw new Error('The dashboard could not reach the API. Check the API upstream setting and redeploy.');
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     let detail = response.statusText;
