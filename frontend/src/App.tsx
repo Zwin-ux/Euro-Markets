@@ -1,4 +1,4 @@
-import { Suspense, lazy, useDeferredValue, useEffect, useRef, useState, useTransition } from 'react';
+import { Suspense, lazy, useDeferredValue, useState, useTransition } from 'react';
 import Papa from 'papaparse';
 import { useQuery } from '@tanstack/react-query';
 
@@ -144,7 +144,6 @@ function App() {
   const [draftScenarioRows, setDraftScenarioRows] = useState<ScenarioDraftRow[]>([]);
   const [committedScenarioShocks, setCommittedScenarioShocks] = useState<Record<string, number>>({});
   const [isPending, startTransition] = useTransition();
-  const hasSeededTemplate = useRef(false);
 
   const deferredPortfolioRows = useDeferredValue(portfolioRows);
 
@@ -165,16 +164,8 @@ function App() {
     setCommittedScenarioShocks({});
   }
 
-  useEffect(() => {
-    if (templateQuery.data && portfolioRows.length === 0 && !hasSeededTemplate.current) {
-      hasSeededTemplate.current = true;
-      startTransition(() => {
-        applyPortfolioRows(templateQuery.data.sample, 'Sample portfolio from API');
-      });
-    }
-  }, [templateQuery.data, portfolioRows.length]);
-
-  const currencyOptions = (currencyQuery.data ?? []).map((row) => row.symbol).filter((symbol) => symbol !== 'EUR');
+  const fetchedCurrencyOptions = (currencyQuery.data ?? []).map((row) => row.symbol).filter((symbol) => symbol !== 'EUR');
+  const currencyOptions = fetchedCurrencyOptions.length > 0 ? fetchedCurrencyOptions : DEFAULT_MARKET_CURRENCIES;
   const effectiveFocusCurrency = currencyOptions.includes(focusCurrency) ? focusCurrency : (currencyOptions[0] ?? 'USD');
   const effectiveMarketCurrencies = (() => {
     const next = marketCurrencies.filter((currency) => currencyOptions.includes(currency));
@@ -191,7 +182,7 @@ function App() {
 
   const marketQuery = useQuery({
     queryKey: ['market-monitor', effectiveFocusCurrency, effectiveMarketCurrencies.join(','), lookbackDays, frequency],
-    enabled: currencyOptions.length > 0 && effectiveMarketCurrencies.length > 0,
+    enabled: effectiveMarketCurrencies.length > 0,
     queryFn: () =>
       fetchMarketMonitor({
         focusCurrency: effectiveFocusCurrency,
@@ -250,8 +241,7 @@ function App() {
       }),
   });
 
-  const baseError =
-    healthQuery.error || currencyQuery.error || templateQuery.error || marketQuery.error || overviewAnalysisQuery.error;
+  const coreError = healthQuery.error || currencyQuery.error || marketQuery.error;
 
   function handleLoadSample() {
     if (!templateQuery.data) {
@@ -312,24 +302,22 @@ function App() {
     });
   }
 
-  if (baseError instanceof Error) {
-    return <div className="app-state">{baseError.message}</div>;
+  if (coreError instanceof Error) {
+    return <div className="app-state">{coreError.message}</div>;
   }
 
-  if (!healthQuery.data || !templateQuery.data || !marketQuery.data || !overviewAnalysisQuery.data) {
-    return <div className="app-state">Loading the operating picture...</div>;
-  }
-
-  const overviewAnalysis = overviewAnalysisQuery.data;
+  const health = healthQuery.data;
   const market = marketQuery.data;
+  const overviewAnalysis = overviewAnalysisQuery.data;
+  const portfolioLoaded = deferredPortfolioRows.length > 0;
   const activeTabConfig = TAB_CONFIG.find((tab) => tab.id === activeTab) ?? TAB_CONFIG[0];
-  const topExposure = overviewAnalysis.currency_exposure.find((row) => row.currency !== 'EUR');
+  const topExposure = overviewAnalysis?.currency_exposure.find((row) => row.currency !== 'EUR');
   const activeShockCount = Object.keys(committedScenarioShocks).length;
   const worstScenario =
-    overviewAnalysis.scenario_analysis
+    overviewAnalysis?.scenario_analysis
       .slice()
       .sort((left, right) => left.scenario_pnl_eur - right.scenario_pnl_eur)
-      .find((row) => row.scenario_pnl_eur !== 0) ?? overviewAnalysis.scenario_analysis[0];
+      .find((row) => row.scenario_pnl_eur !== 0) ?? overviewAnalysis?.scenario_analysis[0];
 
   const tabMeta: Record<TabId, string> = {
     overview: `Focus EUR/${effectiveFocusCurrency}`,
@@ -351,8 +339,12 @@ function App() {
     },
     {
       label: 'Priority watch',
-      value: topExposure?.currency ?? 'EUR only',
-      detail: topExposure ? formatCurrency(topExposure.value_eur, { compact: true }) : 'No non-EUR exposure',
+      value: portfolioLoaded ? topExposure?.currency ?? 'EUR only' : 'Load sample',
+      detail: topExposure
+        ? formatCurrency(topExposure.value_eur, { compact: true })
+        : portfolioLoaded
+          ? 'No non-EUR exposure'
+          : 'Upload a portfolio or load the sample book',
     },
     {
       label: 'Scenario state',
@@ -532,8 +524,8 @@ function App() {
         <header className="hero-panel">
           <div className="hero-panel__status">
             <span>ECB reference rates</span>
-            <span>API {healthQuery.data.status}</span>
-            <span>{formatLongDate(healthQuery.data.date)}</span>
+            <span>API {health?.status ?? 'starting'}</span>
+            <span>{health ? formatLongDate(health.date) : 'Connecting to backend'}</span>
           </div>
           <div className="hero-panel__grid">
             <div className="hero-panel__brief">
@@ -543,21 +535,31 @@ function App() {
               <div className="hero-panel__signalbar">
                 <article className="hero-signal">
                   <span>Primary watch</span>
-                  <strong>{topExposure?.currency ?? 'EUR only'}</strong>
-                  <p>{topExposure ? formatCurrency(topExposure.value_eur) : 'No non-EUR exposure in scope'}</p>
+                  <strong>{portfolioLoaded ? topExposure?.currency ?? 'EUR only' : 'Load book'}</strong>
+                  <p>
+                    {topExposure
+                      ? formatCurrency(topExposure.value_eur)
+                      : portfolioLoaded
+                        ? 'No non-EUR exposure in scope'
+                        : 'Use the sample book or upload a CSV to compute exposure'}
+                  </p>
                 </article>
                 <article className="hero-signal">
                   <span>Market regime</span>
-                  <strong>{formatPercent(market.summary.annualized_volatility, 1)}</strong>
-                  <p>{formatPercent(market.summary.max_drawdown, 1)} max drawdown over the selected window</p>
+                  <strong>{market ? formatPercent(market.summary.annualized_volatility, 1) : 'Loading...'}</strong>
+                  <p>
+                    {market
+                      ? `${formatPercent(market.summary.max_drawdown, 1)} max drawdown over the selected window`
+                      : 'Fetching the live EUR market snapshot'}
+                  </p>
                 </article>
                 <article className="hero-signal">
                   <span>Scenario watch</span>
-                  <strong>{worstScenario?.currency ?? 'Flat'}</strong>
+                  <strong>{portfolioLoaded ? worstScenario?.currency ?? 'Flat' : 'Pending'}</strong>
                   <p>
-                    {worstScenario
+                    {portfolioLoaded && worstScenario
                       ? formatCurrency(worstScenario.scenario_pnl_eur, { signed: true })
-                      : 'No scenario sensitivity available'}
+                      : 'Scenario sensitivity appears after a portfolio is loaded'}
                   </p>
                 </article>
               </div>
@@ -565,13 +567,19 @@ function App() {
             <div className="hero-panel__metrics">
               <MetricCard
                 label="Largest FX exposure"
-                value={topExposure?.currency ?? 'EUR only'}
-                detail={formatCurrency(topExposure?.value_eur ?? 0)}
+                value={portfolioLoaded ? topExposure?.currency ?? 'EUR only' : 'No portfolio'}
+                detail={
+                  topExposure
+                    ? formatCurrency(topExposure.value_eur)
+                    : portfolioLoaded
+                      ? 'No non-EUR positions'
+                      : 'Load sample or upload CSV'
+                }
               />
               <MetricCard
                 label="Rates as of"
-                value={formatLongDate(market.latest_snapshot[0]?.rate_date ?? healthQuery.data.date)}
-                detail={`EUR/${effectiveFocusCurrency} at ${formatRate(market.summary.latest_rate)}`}
+                value={market ? formatLongDate(market.latest_snapshot[0]?.rate_date ?? health?.date ?? '') : 'Loading...'}
+                detail={market ? `EUR/${effectiveFocusCurrency} at ${formatRate(market.summary.latest_rate)}` : 'Fetching ECB snapshot'}
               />
               <MetricCard
                 label="Portfolio rows"
@@ -580,8 +588,20 @@ function App() {
               />
               <MetricCard
                 label="Non-EUR share"
-                value={formatPercent(overviewAnalysis.summary.non_eur_share, 1)}
-                detail={formatCurrency(overviewAnalysis.summary.portfolio_value_eur, { compact: true })}
+                value={
+                  overviewAnalysis
+                    ? formatPercent(overviewAnalysis.summary.non_eur_share, 1)
+                    : portfolioLoaded
+                      ? 'Calculating...'
+                      : 'Pending'
+                }
+                detail={
+                  overviewAnalysis
+                    ? formatCurrency(overviewAnalysis.summary.portfolio_value_eur, { compact: true })
+                    : portfolioLoaded
+                      ? 'Computing portfolio summary'
+                      : 'Requires a loaded portfolio'
+                }
               />
             </div>
           </div>
@@ -607,11 +627,20 @@ function App() {
 
         <Suspense fallback={<div className="app-state">Loading the view...</div>}>
           {activeTab === 'overview' ? (
-            <OverviewTab focusCurrency={effectiveFocusCurrency} market={market} analysis={overviewAnalysis} />
+            <OverviewTab
+              focusCurrency={effectiveFocusCurrency}
+              market={market}
+              analysis={overviewAnalysis}
+              marketLoading={marketQuery.isLoading}
+              analysisLoading={overviewAnalysisQuery.isLoading}
+              portfolioLoaded={portfolioLoaded}
+            />
           ) : null}
 
           {activeTab === 'risk' ? (
-            riskSelection.filtered.length === 0 ? (
+            !portfolioLoaded ? (
+              <div className="app-state">Load the sample portfolio or upload a CSV to start portfolio risk analysis.</div>
+            ) : riskSelection.filtered.length === 0 ? (
               <div className="app-state">No positions match the current risk filters.</div>
             ) : riskAnalysisQuery.data ? (
               <PortfolioRiskTab analysis={riskAnalysisQuery.data} />
@@ -621,7 +650,9 @@ function App() {
           ) : null}
 
           {activeTab === 'stress' ? (
-            stressSelection.filtered.length === 0 ? (
+            !portfolioLoaded ? (
+              <div className="app-state">Load the sample portfolio or upload a CSV to start scenario analysis.</div>
+            ) : stressSelection.filtered.length === 0 ? (
               <div className="app-state">No positions match the current stress-test filters.</div>
             ) : stressAnalysisQuery.data ? (
               <StressTestTab
@@ -655,14 +686,18 @@ function App() {
           ) : null}
 
           {activeTab === 'data' ? (
-            <DataApiTab
-              health={healthQuery.data}
-              template={templateQuery.data}
-              currencyCatalog={currencyQuery.data ?? []}
-              market={market}
-              lookbackDays={lookbackDays}
-              frequency={frequency}
-            />
+            health && templateQuery.data && market ? (
+              <DataApiTab
+                health={health}
+                template={templateQuery.data}
+                currencyCatalog={currencyQuery.data ?? []}
+                market={market}
+                lookbackDays={lookbackDays}
+                frequency={frequency}
+              />
+            ) : (
+              <div className="app-state">Loading reference data...</div>
+            )
           ) : null}
         </Suspense>
       </main>
